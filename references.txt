@@ -1,0 +1,4 @@
+Basic Pi <-> Arduino Communication over USB
+http://www.seeed.cc/project_detail.html?id=168
+
+
