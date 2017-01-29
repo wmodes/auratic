@@ -1,5 +1,12 @@
+/* RFID Reader (Truth Machine Project)
+ by Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
+ 29 January 2017 
+*/
+
 #include <SoftwareSerial.h>
+
 SoftwareSerial RFID(2, 3); // RX and TX
+SoftwareSerial USB(2, 3); // RX and TX
 
 int digit;
 int led = 13;
@@ -7,10 +14,15 @@ int rfidLen = 41;
 int rfidByteCount = 14;
 int rfidCount = 3;
 
+String id_req = "id";
+String id_response = "rfid";
+
 void setup()
 {
     RFID.begin(9600);    // start serial to RFID reader
+    RFID.setTimeout(500);  // we'll wait a half sec
     Serial.begin(9600);  // start serial to PC 
+    Serial.setTimeout(500);  // we'll wait a half sec
     pinMode(led, OUTPUT);
 }
 
@@ -19,6 +31,17 @@ void loop()
   // create a string array to put our full RFID
   char fullId[rfidLen];
   fullId[0] = '\0';
+  // do we have a request from the master?
+  if (Serial.available() > 0) 
+  {
+    String master_req = Serial.readString();
+    Serial.print("We received: ");
+    Serial.println(master_req);
+    if (master_req == id_req) {
+      Serial.print("We sent: ");
+      Serial.println(id_response);
+    }
+  }
   // do we have a digit waiting?
   if (RFID.available() > 0) 
   {
@@ -43,7 +66,7 @@ void loop()
     }
     // We send three times to guard against serial data loss
     for(int i = 0; i < rfidCount; i++) {
-      Serial.println(fullId);
+      USB.println(fullId);
     }
     digitalWrite(led, HIGH);
     delay(250);

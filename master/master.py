@@ -12,15 +12,8 @@ import os
 import subprocess
 import selenium.webdriver as webdriver
 from selenium.webdriver.common.keys import Keys
-from rfid_object_db import object_db
+from rfid_object_db import *
 
-youtube_url = "https://www.youtube.com/embed/"
-#youtube_url = "http://www.youtube.com/watch_popup?v="
-#youtube_url = "https://www.youtube.com/tv#/watch?v="
-#youtube_url = "https://www.youtube.com/watch?v="
-youtube_post = "?rel=0&autoplay=1"
-
-default_url = youtube_url + "OByCDlsk9jo" + youtube_post
 
 rfid_send_count = 3
 rfid_length = 43
@@ -37,16 +30,18 @@ browser.maximize_window()
 #browser.driver.manage().window().fullscreen()
 browser.get(default_url)
 
-# find active USB port
-def get_active_usb():
+def get_active_usb_ports():
+    """Search usb ports and find out which ones are active, returning a list"""
+    usb_list = []
     for port_num in range(10):
         usb_port = "/dev/ttyUSB" + str(port_num)
         print "Checking if %s is active:" % (usb_port),
         if os.path.exists(usb_port):
             print "Yes"
-            return usb_port
+            usb_list.append(usb_port)
         else:
             print "No"
+    return usb_list
 
 def display_found_object(rfid):
     if rfid not in object_db:

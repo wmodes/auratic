@@ -4,6 +4,14 @@
 __author__      = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
 __copyright__   = "2017, MIT"
 
+youtube_url = "https://www.youtube.com/embed/"
+#youtube_url = "http://www.youtube.com/watch_popup?v="
+#youtube_url = "https://www.youtube.com/tv#/watch?v="
+#youtube_url = "https://www.youtube.com/watch?v="
+youtube_post = "?rel=0&autoplay=1"
+
+default_url = youtube_url + "OByCDlsk9jo" + youtube_post
+
 object_db = {
     "default": {
         "id": 0, 
