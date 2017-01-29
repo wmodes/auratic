@@ -1,4 +1,4 @@
-/* Simulated Chart Recorder (Truth Machine Project)
+/* chart_recroder_sim.cpp - Simulated Chart Recorder (Truth Machine Project)
  by Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
  29 January 2017 
 */
