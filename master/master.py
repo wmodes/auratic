@@ -4,7 +4,6 @@
 __author__      = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
 __copyright__   = "2017, MIT"
 
-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import serial
@@ -14,9 +13,14 @@ import selenium.webdriver as webdriver
 from selenium.webdriver.common.keys import Keys
 from rfid_object_db import *
 
-
+# Constants
+#
 rfid_send_count = 3
 rfid_length = 43
+id_req = "id"
+id_response = "id:"
+id_rfid = "id:rfid"
+id_chart = "id:chart"
 
 # setup stuff
 #
@@ -43,6 +47,31 @@ def get_active_usb_ports():
             print "No"
     return usb_list
 
+def request_id(serial_port):
+    """Send an ID request to the serial on a port and return the ID we get"""
+    ser = serial.Serial(serial_port, 9600)
+    ser.println(if_req)
+    response = ser.readline()
+    return response
+
+def setup_serial():
+    global rfid_serial, chart_serial
+    usb_ports = get_active_usb_ports()
+    if not usb_ports:
+        print "ERROR: No active USB port found"
+        exit()
+    for port in usb_ports:
+        print "Examining:", port, ":",
+        response = request_id(port)
+        if (response == id_rfid):
+            rfid_serial = serial.Serial(port, 9600)
+            print "RFID Reader"
+        elif (response == id_chart):
+            chart_serial = serial.Serial(port, 9600)
+            print "Chart recorder"
+        else:
+            print "Unknown"
+
 def display_found_object(rfid):
     if rfid not in object_db:
         rfid = "default"
@@ -55,18 +84,13 @@ def display_found_object(rfid):
     browser.get(url)
 
 def main():
-    usb_port = get_active_usb()
-    if not usb_port:
-        print "ERROR: No active USB port found"
-        exit()
-
-    ser = serial.Serial(usb_port, 9600)
+    setup_serial()
 
     print "Begin listening for RFID"
     # This is our main loop that listens and responds
     while 1 :
         # do we have data on the input buffer waiting
-        if ser.in_waiting > 0:
+        if rfid_serial.in_waiting > 0:
             # if we send the same rfid multiple times
             #   in theory they should all be the same,
             #   but in practice we are sometimes missing bytes.
@@ -76,9 +100,9 @@ def main():
             # we keep looking if we have something waiting
             #   AND we haven't exceeded our count
             #   AND we haven't already rec'd a good rfid
-            while (ser.in_waiting > 0 and count < rfid_send_count and 
+            while (rfid_serial.in_waiting > 0 and count < rfid_send_count and 
                    not rfid_good):
-                rfid_in = ser.readline().strip()
+                rfid_in = rfid_serial.readline().strip()
                 # if the rfid has the proper length,
                 # we can trust it
                 if len(rfid_in) == rfid_length:
@@ -93,7 +117,7 @@ def main():
                 display_found_object(rfid_good)
 
             # clear incoming buffer in case we have stuff waiting
-            ser.reset_input_buffer()
+            rfid_serial.reset_input_buffer()
 
             print "Begin listening for RFID"
 
