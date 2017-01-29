@@ -15,7 +15,7 @@ int rfidByteCount = 14;
 int rfidCount = 3;
 
 String id_req = "id";
-String id_response = "rfid";
+String id_response = "id:rfid";
 
 void setup()
 {
@@ -35,10 +35,10 @@ void loop()
   if (Serial.available() > 0) 
   {
     String master_req = Serial.readString();
-    Serial.print("We received: ");
-    Serial.println(master_req);
+    //Serial.print("We received: ");
+    //Serial.println(master_req);
     if (master_req == id_req) {
-      Serial.print("We sent: ");
+      //Serial.print("We sent: ");
       Serial.println(id_response);
     }
   }

@@ -23,6 +23,9 @@ const int AVAILPENS[] = {9, 10, 11, 3, 5, 6};   // avail arduino pins (order of 
 const int MAXPENS = sizeof(AVAILPENS);
 const int PENSINUSE = 2;    // how many pens are we actually using
 
+String id_req = "id";
+String id_response = "id:chart";
+
 // Set up 
 
 int penPos[PENSINUSE];      // postion of servo
@@ -187,49 +190,42 @@ void setup()
 
 void loop() 
 {
-  // penStatus(0);
-  // penStart(0, 100);
-  // penStatus(0);
-  
-  //penStart(1, 45, 1);
-  //penStatus(1);
 
-  // for (int i1 = 0; i1 < MAXPENS; i1++) {
-  //   for (int i2 = 0; i2 < MAXDATA; i2++) {
-  //     Serial.print(dataset[i1][i2]);
-  //     Serial.print(", ");
-  //   }
-  //   Serial.println("");
-  // }
-  
-  while(true) {
-    for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
-      //penStatus(penNo);
-      // if we are not in the middle of a wave...
-      if (! penMoving[penNo]){
-        // ... get a new wave from the dataset
-        int newAmp = dataset[penNo][datasetPos[penNo]];
-        // Serial.print("Dataset Pos: ");
-        // Serial.print(datasetPos[penNo]);
-        // Serial.print(", New Amp: ");
-        // Serial.println(newAmp);
-        penStart(penNo, newAmp);
-        datasetPos[penNo]++;
-        // check to see if we've run out of data
-        if (datasetPos[penNo] >= datalength[penNo]) {
-          datasetPos[penNo] = 0;
-        }
-        //penStatus(penNo);
-      }
-      else {
-        penMove(penNo);
-      }
+  // do we have a request from the master?
+  if (Serial.available() > 0) 
+  {
+    String master_req = Serial.readString();
+    //Serial.print("We received: ");
+    //Serial.println(master_req);
+    if (master_req == id_req) {
+      //Serial.print("We sent: ");
+      Serial.println(id_response);
     }
-    delay(GLOBAL_WAIT);
   }
+  // for each attached pen, we update it once per cycle
+  for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
+    //penStatus(penNo);
+    // if we are not in the middle of a wave...
+    if (! penMoving[penNo]){
+      // ... get a new wave from the dataset
+      int newAmp = dataset[penNo][datasetPos[penNo]];
+      // Serial.print("Dataset Pos: ");
+      // Serial.print(datasetPos[penNo]);
+      // Serial.print(", New Amp: ");
+      // Serial.println(newAmp);
+      penStart(penNo, newAmp);
+      datasetPos[penNo]++;
+      // check to see if we've run out of data
+      if (datasetPos[penNo] >= datalength[penNo]) {
+        datasetPos[penNo] = 0;
+      }
+      //penStatus(penNo);
+    }
+    else {
+      penMove(penNo);
+    }
+  }
+  delay(GLOBAL_WAIT);
 
-  //delay(10000);
-  //cli();
-  while( true ); //An empty loop.
 }
 
