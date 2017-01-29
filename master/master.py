@@ -1,7 +1,9 @@
-# test-report-rfid.py
-# listen for RFID from active USB port
-# author: SL Benz & Wes Modes
-# created: 6 Jan 2017
+#!/usr/bin/python
+# -*- coding: iso-8859-15 -*-
+"""master.py: listen for RFID from active USB port and trigger chart recorder and video"""
+__author__      = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
+__copyright__   = "2017, MIT"
+
 
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 

@@ -1,3 +1,9 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-15 -*-
+"""rfid_object_db.py: actions for rfid triggers"""
+__author__      = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
+__copyright__   = "2017, MIT"
+
 object_db = {
     "default": {
         "id": 0, 
