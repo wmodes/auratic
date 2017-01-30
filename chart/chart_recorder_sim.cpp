@@ -179,7 +179,7 @@ void moveAll()
 void setup() 
 {
   Serial.begin(9600);      // open the serial port at 9600 bps:
-  Serial.println("\n\n\n");
+  //Serial.println("\n\n\n");
   for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
     penSetup(penNo);
     datasetPos[penNo] = 0;
