@@ -99,6 +99,11 @@ def display_found_object(rfid):
 
 def main():
     setup_serial()
+    if not rfid_serial:
+        print "FATAL ERROR: No RFID reader found."
+        exit()
+    if not chart_serial:
+        print "WARNING: No chart reader found."
 
     print "Begin listening for RFID"
     # This is our main loop that listens and responds
