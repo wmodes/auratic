@@ -127,6 +127,7 @@ def display_found_object(data):
     # browser.get(url)
 
 def start_chart(time):
+    global chart_timer
     """Start the chart recorder and set callback timer to turn it off"""
     # first we cancel any timer we've set before
     if (chart_timer):
@@ -191,5 +192,13 @@ def main():
             print "Begin listening for RFID"
 
 
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':
+    try:     
+        # Enter the main loop
+        main()
+    except Exception as e: 
+        print ""
+        print str(e)
+    except:
+        print ""
+        print "Exiting."
