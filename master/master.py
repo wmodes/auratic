@@ -126,10 +126,24 @@ def display_found_object(data):
     print "Showing video", url
     # browser.get(url)
 
-def trigger_actions(data):
-    duration = data["duration"]
+def start_chart(time):
+    """Start the chart recorder and set callback timer to turn it off"""
+    # first we cancel any timer we've set before
+    if (chart_timer):
+        chart_timer.cancel()
     results = tell_client(chart_serial, req_start)
     print "Start chart recorder:", results
+    chart_timer = threading.Timer(time, stop_chart).start()
+
+def stop_chart(time):
+    """Stops the chart recorder"""
+    results = tell_client(chart_serial, req_stop)
+    print "Stop chart recorder:", results
+
+def trigger_actions(data):
+    """Trigger all of the actions specified by the database"""
+    duration = data["duration"]
+    start_chart(duration)
 
 def main():
     setup_serial()
