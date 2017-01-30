@@ -18,10 +18,21 @@ from time import sleep
 #
 rfid_send_count = 3
 rfid_length = 43
-id_req = "id"
-id_response = "id:"
+max_retries = 20
+retry_delay = 0.25
+serial_timeout = 0.5
+
+# communication protocols
+req_id = "id"
+req_start = "start";
+req_stop = "stop";
+rsp_ack = "ack";
+
+# id's
 id_rfid = "id:rfid"
 id_chart = "id:chart"
+
+# serial device handles
 rfid_serial = ""
 chart_serial = ""
 
@@ -52,19 +63,18 @@ def get_active_usb_ports():
 
 def request_id(port):
     """Send an ID request to the serial and return the ID we get"""
-    ser = serial.Serial(port, 9600, timeout=.5)
+    ser = serial.Serial(port, 9600, timeout=serial_timeout)
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    response = ""
-    for i in range(20):
-        ser.write(id_req)
-        sleep(0.5)
+    for i in range(max_retries):
+        ser.write(req_id)
+        sleep(retry_delay)
         waiting = ser.inWaiting()
         response = ser.readline().strip()
         # print "Serial Try", i, "=", response, "waiting:", waiting
         if response:
             break
-        sleep(0.5)
+        sleep(retry_delay)
     return response
 
 def setup_serial():
@@ -75,8 +85,6 @@ def setup_serial():
         exit()
     for port in usb_ports:
         print "Setting up:", port,
-        #ser = serial.Serial(port, 9600, timeout=.5)
-        sleep(1)
         response = request_id(port)
         print "Response:", response,
         if (id_rfid in response):
@@ -88,16 +96,35 @@ def setup_serial():
         else:
             print "Unknown"
 
-def display_found_object(rfid):
+def tell_client(ser, text):
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+    for i in range(max_retries):
+        ser.write(text)
+        sleep(retry_delay)
+        waiting = ser.inWaiting()
+        response = ser.readline().strip()
+        # print "Serial Try", i, "=", response, "waiting:", waiting
+        if rsp_ack in response:
+            return response
+        sleep(retry_delay)
+
+def get_rfid_data(rfid):
     if rfid not in object_db:
         rfid = "default"
-    my_object = object_db[rfid]
-    title = object_db[rfid]["title"]
-    category = object_db[rfid]["category"]
-    url = youtube_url + object_db[rfid]["video"] + youtube_post
+    return object_db[rfid]
+
+def display_found_object(data):
+    title = data["title"]
+    category = data["category"]
+    url = youtube_url + data["video"] + youtube_post
     print "This is a", title
     print "Showing video", url
     # browser.get(url)
+
+def trigger_actions(data):
+    duration = data["duration"]
+    tell_client(chart_serial, req_start)
 
 def main():
     setup_serial()
@@ -135,7 +162,9 @@ def main():
 
             if rfid_good:
                 print "RFID found:", rfid_good
-                display_found_object(rfid_good)
+                data = get_rfid_data(rfid_good)
+                display_found_object(data)
+                trigger_actions(data)
 
             # clear incoming buffer in case we have stuff waiting
             rfid_serial.reset_input_buffer()
