@@ -22,6 +22,8 @@ id_req = "id"
 id_response = "id:"
 id_rfid = "id:rfid"
 id_chart = "id:chart"
+rfid_serial = ""
+chart_serial = ""
 
 # setup stuff
 #
