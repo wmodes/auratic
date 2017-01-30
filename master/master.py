@@ -20,7 +20,7 @@ import threading
 rfid_send_count = 3
 rfid_length = 43
 max_retries = 20
-retry_delay = 0.25
+retry_delay = 0.5
 serial_timeout = 0.5
 
 # communication protocols
@@ -36,6 +36,9 @@ id_chart = "id:chart"
 # serial device handles
 rfid_serial = ""
 chart_serial = ""
+
+# timers
+chart_timer = None
 
 # setup stuff
 #
@@ -125,7 +128,8 @@ def display_found_object(data):
 
 def trigger_actions(data):
     duration = data["duration"]
-    tell_client(chart_serial, req_start)
+    results = tell_client(chart_serial, req_start)
+    print "Start chart recorder:", results
 
 def main():
     setup_serial()
