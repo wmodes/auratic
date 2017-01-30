@@ -48,35 +48,40 @@ def get_active_usb_ports():
             print "No"
     return usb_list
 
-def request_id(ser):
+def request_id(port):
     """Send an ID request to the serial and return the ID we get"""
-    ser.flush()
-    ser.write(id_req)
+    ser = serial.Serial(port, 9600, timeout=.5)
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     response = ""
     for i in range(20):
+        ser.write(id_req)
+        sleep(0.5)
+        waiting = ser.inWaiting()
         response = ser.readline().strip()
-        print "Try", i, "=", response,
+        # print "Serial Try", i, "=", response, "waiting:", waiting
         if response:
             break
-    print ""
+        sleep(0.5)
     return response
 
 def setup_serial():
-    global ser, rfid_serial, chart_serial
+    global rfid_serial, chart_serial
     usb_ports = get_active_usb_ports()
     if not usb_ports:
         print "ERROR: No active USB port found"
         exit()
     for port in usb_ports:
         print "Setting up:", port,
-        ser = serial.Serial(port, 9600, timeout=0.25)
-        response = request_id(ser)
+        #ser = serial.Serial(port, 9600, timeout=.5)
+        sleep(1)
+        response = request_id(port)
         print "Response:", response,
         if (id_rfid in response):
-            rfid_serial = ser
+            rfid_serial = serial.Serial(port, 9600, timeout=.5)
             print "RFID Reader"
         elif (id_chart in response):
-            chart_serial = ser
+            chart_serial = serial.Serial(port, 9600, timeout=.5)
             print "Chart recorder"
         else:
             print "Unknown"

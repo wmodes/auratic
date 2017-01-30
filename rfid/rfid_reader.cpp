@@ -6,7 +6,6 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial RFID(2, 3); // RX and TX
-SoftwareSerial USB(2, 3); // RX and TX
 
 int digit;
 int led = 13;
