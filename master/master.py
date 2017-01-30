@@ -53,7 +53,11 @@ def request_id(ser):
     ser.write(id_req)
     ser.flush()
     sleep(1)
-    response = ser.readline().strip()
+    response = ""
+    for i in range(3):
+        response = ser.readline().strip()
+        if response:
+            break
     return response
 
 def setup_serial():
