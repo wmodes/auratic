@@ -69,7 +69,7 @@ def setup_serial():
         exit()
     for port in usb_ports:
         print "Setting up:", port,
-        ser = serial.Serial(port, 9600, timeout=1)
+        ser = serial.Serial(port, 9600, timeout=0.25)
         response = request_id(ser)
         print "Response:", response,
         if (id_rfid in response):
