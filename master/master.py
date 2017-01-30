@@ -38,7 +38,7 @@ rfid_serial = ""
 chart_serial = ""
 
 # timers
-chart_timer = None
+chart_timer = ""
 
 # setup stuff
 #
@@ -129,6 +129,7 @@ def display_found_object(data):
 def start_chart(time):
     global chart_timer
     """Start the chart recorder and set callback timer to turn it off"""
+    global chart_timer
     # first we cancel any timer we've set before
     if (chart_timer):
         chart_timer.cancel()
@@ -136,7 +137,7 @@ def start_chart(time):
     print "Start chart recorder:", results
     chart_timer = threading.Timer(time, stop_chart).start()
 
-def stop_chart(time):
+def stop_chart():
     """Stops the chart recorder"""
     results = tell_client(chart_serial, req_stop)
     print "Stop chart recorder:", results
