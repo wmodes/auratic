@@ -29,6 +29,9 @@ String req_stop = "stop";
 String rsp_id = "id:chart";
 String rsp_ack = "ack";
 
+// Globals
+boolean activated = false;
+
 // Set up 
 
 int penPos[PENSINUSE];      // postion of servo
@@ -214,11 +217,11 @@ void loop()
     }
     else if (find_text(req_start, master_req) >= 0) {
       Serial.println(rsp_ack);
-      activated = 1
+      activated = true;
     }
     else if (find_text(req_stop, master_req) >= 0) {
       Serial.println(rsp_ack);
-      activated = 0
+      activated = false;
     }
   }
   if (activated) {
