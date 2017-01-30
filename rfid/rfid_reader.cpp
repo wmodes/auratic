@@ -26,6 +26,16 @@ void setup()
     pinMode(led, OUTPUT);
 }
 
+int find_text(String needle, String haystack) {
+  int foundpos = -1;
+  for (int i = 0; i <= haystack.length() - needle.length(); i++) {
+    if (haystack.substring(i,needle.length()+i) == needle) {
+      foundpos = i;
+    }
+  }
+  return foundpos;
+}
+
 void loop()
 {
   // create a string array to put our full RFID
@@ -37,7 +47,7 @@ void loop()
     String master_req = Serial.readString();
     //Serial.print("We received: ");
     //Serial.println(master_req);
-    if (master_req == id_req) {
+    if (find_text(id_req, master_req) >= 0) {
       //Serial.print("We sent: ");
       Serial.println(id_response);
     }
