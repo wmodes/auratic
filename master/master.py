@@ -25,15 +25,15 @@ id_chart = "id:chart"
 
 # setup stuff
 #
-print "Opening browser window. This will take a little bit."
-os.environ["DISPLAY"] = ":0.0"
-fp = webdriver.FirefoxProfile()
-fp.set_preference("browser.fullscreen.autohide",True)
-fp.set_preference("browser.fullscreen.animateUp",0)
-browser = webdriver.Firefox(firefox_profile=fp)
-browser.maximize_window()
+#print "Opening browser window. This will take a little bit."
+#os.environ["DISPLAY"] = ":0.0"
+#fp = webdriver.FirefoxProfile()
+#fp.set_preference("browser.fullscreen.autohide",True)
+#fp.set_preference("browser.fullscreen.animateUp",0)
+#browser = webdriver.Firefox(firefox_profile=fp)
+#browser.maximize_window()
 #browser.driver.manage().window().fullscreen()
-browser.get(default_url)
+#browser.get(default_url)
 
 def get_active_usb_ports():
     """Search usb ports and find out which ones are active, returning a list"""
@@ -51,17 +51,19 @@ def get_active_usb_ports():
 def request_id(ser):
     """Send an ID request to the serial and return the ID we get"""
     ser.write(id_req)
-    ser.flush()
+    #ser.flush()
     sleep(1)
     response = ""
-    for i in range(3):
+    for i in range(5):
         response = ser.readline().strip()
+        print "Try", i, "=", response,
         if response:
             break
+    print ""
     return response
 
 def setup_serial():
-    global rfid_serial, chart_serial
+    global ser, rfid_serial, chart_serial
     usb_ports = get_active_usb_ports()
     if not usb_ports:
         print "ERROR: No active USB port found"
@@ -89,7 +91,7 @@ def display_found_object(rfid):
     url = youtube_url + object_db[rfid]["video"] + youtube_post
     print "This is a", title
     print "Showing video", url
-    browser.get(url)
+    #browser.get(url)
 
 def main():
     setup_serial()
