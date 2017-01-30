@@ -12,6 +12,7 @@ import subprocess
 import selenium.webdriver as webdriver
 from selenium.webdriver.common.keys import Keys
 from rfid_object_db import *
+from time import sleep
 
 # Constants
 #
@@ -49,8 +50,10 @@ def get_active_usb_ports():
 
 def request_id(serial_port):
     """Send an ID request to the serial on a port and return the ID we get"""
-    ser = serial.Serial(serial_port, 9600)
+    ser = serial.Serial(serial_port, 9600, timeout=1)
     ser.write(id_req)
+    ser.flush()
+    sleep(1)
     response = ser.readline()
     return response
 
@@ -64,10 +67,10 @@ def setup_serial():
         print "Examining:", port, ":",
         response = request_id(port)
         if (response == id_rfid):
-            rfid_serial = serial.Serial(port, 9600)
+            rfid_serial = serial.Serial(port, 9600, timeout=1)
             print "RFID Reader"
         elif (response == id_chart):
-            chart_serial = serial.Serial(port, 9600)
+            chart_serial = serial.Serial(port, 9600, timeout=1)
             print "Chart recorder"
         else:
             print "Unknown"
