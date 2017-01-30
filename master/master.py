@@ -50,7 +50,7 @@ def get_active_usb_ports():
 def request_id(serial_port):
     """Send an ID request to the serial on a port and return the ID we get"""
     ser = serial.Serial(serial_port, 9600)
-    ser.println(if_req)
+    ser.write(id_req)
     response = ser.readline()
     return response
 
