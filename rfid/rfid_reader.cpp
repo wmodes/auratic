@@ -75,7 +75,7 @@ void loop()
     }
     // We send three times to guard against serial data loss
     for(int i = 0; i < rfidCount; i++) {
-      USB.println(fullId);
+      Serial.println(fullId);
     }
     digitalWrite(led, HIGH);
     delay(250);
