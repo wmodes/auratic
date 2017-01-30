@@ -127,12 +127,12 @@ def display_found_object(data):
     # browser.get(url)
 
 def start_chart(time):
-    global chart_timer
     """Start the chart recorder and set callback timer to turn it off"""
     global chart_timer
     # first we cancel any timer we've set before
     if (chart_timer):
         chart_timer.cancel()
+        print "Cancelling old timer"
     results = tell_client(chart_serial, req_start)
     print "Start chart recorder:", results
     chart_timer = threading.Timer(time, stop_chart).start()

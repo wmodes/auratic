@@ -216,11 +216,11 @@ void loop()
       Serial.println(rsp_id);
     }
     else if (find_text(req_start, master_req) >= 0) {
-      Serial.println(rsp_ack);
+      Serial.println(req_start + rsp_ack);
       activated = true;
     }
     else if (find_text(req_stop, master_req) >= 0) {
-      Serial.println(rsp_ack);
+      Serial.println(req_stop + rsp_ack);
       activated = false;
     }
   }
