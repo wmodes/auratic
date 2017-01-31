@@ -65,8 +65,9 @@ chart_timer = ""
 
 def is_port_active(port):
     """Check if given port is active"""
-    #print "Checking if %s is active:" % (port),
-    return os.path.exists(port)
+    if (port):
+        #print "Checking if %s is active:" % (port),
+        return os.path.exists(port)
 
 def get_active_usb_ports():
     """Search usb ports and find out which ones are active, returning a list"""
