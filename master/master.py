@@ -224,12 +224,12 @@ def main():
 
 
 if __name__=='__main__':
-    try:     
+    # try:     
         # Enter the main loop
-        main()
-    except Exception as e: 
-        print ""
-        print str(e)
-    except:
-        print ""
-        print "Exiting."
+    main()
+    # except Exception as e: 
+    #     print ""
+    #     print str(e)
+    # except:
+    #     print ""
+    #     print "Exiting."
