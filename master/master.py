@@ -183,18 +183,21 @@ def trigger_actions(data):
 def main():
     setup_serial()
     # This is our main loop that listens and responds
+    last_report_time = int(time())
     while 1 :
         if not is_port_active(device['chart']['port']):
             #device['chart']['live'] = False
             # every 10 seconds, we report this
-            if not bool(int(time()*100) % 1000):
+            if (int(time()) > last_report_time):
                 print "WARNING: No chart reader found."
+                last_report_time = int(time())
             #TODO: Keep looking for chart reader device
         if not is_port_active(device['rfid']['port']):
             #device['rfid']['live'] = False
             # every 10 seconds, we report this
-            if not bool(int(time()*100) % 1000):
+            if (int(time()) > last_report_time):
                 print "ERROR: No RFID reader found."
+                last_report_time = int(time())
             #TODO: Hold everything; keep looking for rfid device
         else:
             rfid_device = device['rfid']['handle']
