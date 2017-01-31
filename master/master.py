@@ -41,7 +41,7 @@ id_chart = "id:chart"
 #
 
 # serial device handles
-devices = {'rfid': {'live': False}, 
+device = {'rfid': {'live': False}, 
           'chart': {'live': False}}
 
 # timers
