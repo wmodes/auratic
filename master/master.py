@@ -41,7 +41,7 @@ id_chart = "id:chart"
 #
 
 # serial device handles
-serial = {'rfid': {'live': False}, 
+devices = {'rfid': {'live': False}, 
           'chart': {'live': False}}
 
 # timers
@@ -111,16 +111,16 @@ def setup_serial():
         #
         # if device IDs as our rfid reader
         if (id_rfid in response):
-            serial['rfid']['handle'] = serial.Serial(port, 9600, timeout=.5)
-            serial['rfid']['port'] = port
-            serial['rfid']['live'] = True
+            device['rfid']['handle'] = serial.Serial(port, 9600, timeout=.5)
+            device['rfid']['port'] = port
+            device['rfid']['live'] = True
             print "RFID Reader"
         #
         # if device IDs as our chart recorder
         elif (id_chart in response):
-            serial['chart']['handle'] = serial.Serial(port, 9600, timeout=.5)
-            serial['chart']['port'] = port
-            serial['chart']['live'] = True
+            device['chart']['handle'] = serial.Serial(port, 9600, timeout=.5)
+            device['chart']['port'] = port
+            device['chart']['live'] = True
             print "Chart recorder"
         #
         # if device IDs as anything else
@@ -132,7 +132,7 @@ def setup_serial():
 #
 
 def tell_client(device, text):
-    ser = serial[device]['handle']
+    ser = device[device]['handle']
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     for i in range(max_retries):
@@ -183,16 +183,16 @@ def main():
     setup_serial()
     # This is our main loop that listens and responds
     while 1 :
-        if not is_port_active(serial['chart']['port']):
+        if not is_port_active(device['chart']['port']):
             print "WARNING: No chart reader found."
             #TODO: Keep looking for chart reader device
-        if not is_port_active(serial['rfid']['port']):
+        if not is_port_active(device['rfid']['port']):
             print "ERROR: No RFID reader found."
             #TODO: Hold everything; keep looking for rfid device
         else:
-            rfid_serial = serial['rfid']['handle']
+            rfid_device = device['rfid']['handle']
             # do we have data on the input buffer waiting
-            if rfid_serial.in_waiting > 0:
+            if rfid_device.in_waiting > 0:
                 # if we send the same rfid multiple times
                 #   in theory they should all be the same,
                 #   but in practice we are sometimes missing bytes.
@@ -202,9 +202,9 @@ def main():
                 # we keep looking if we have something waiting
                 #   AND we haven't exceeded our count
                 #   AND we haven't already rec'd a good rfid
-                while (rfid_serial.in_waiting > 0 and count < rfid_send_count and 
+                while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
                        not rfid_good):
-                    rfid_in = rfid_serial.readline().strip()
+                    rfid_in = rfid_device.readline().strip()
                     # if the rfid has the proper length,
                     # we can trust it
                     if len(rfid_in) == rfid_length:
@@ -219,7 +219,7 @@ def main():
                     display_found_object(data)
                     trigger_actions(data)
                 # clear incoming buffer in case we have stuff waiting
-                rfid_serial.reset_input_buffer()
+                rfid_device.reset_input_buffer()
                 print "Continue listening for RFID"
 
 
