@@ -187,13 +187,13 @@ def main():
         if not is_port_active(device['chart']['port']):
             #device['chart']['live'] = False
             # every 10 seconds, we report this
-            if not bool(int(time()*10) % 100):
+            if not bool(int(time()*100) % 1000):
                 print "WARNING: No chart reader found."
             #TODO: Keep looking for chart reader device
         if not is_port_active(device['rfid']['port']):
             #device['rfid']['live'] = False
             # every 10 seconds, we report this
-            if not bool(int(time()*10) % 100):
+            if not bool(int(time()*100) % 1000):
                 print "ERROR: No RFID reader found."
             #TODO: Hold everything; keep looking for rfid device
         else:
