@@ -17,6 +17,8 @@ import threading
 
 # Constants
 #
+usb_port_prefix = "/dev/ttyUSB"
+max_usb_ports = 12
 rfid_send_count = 3
 rfid_length = 43
 max_retries = 20
@@ -28,14 +30,19 @@ req_id = "id"
 req_start = "start";
 req_stop = "stop";
 rsp_ack = "ack";
+req_handshake =  "hello?"
+rsp_handshake =  "hello!"
 
 # id's
 id_rfid = "id:rfid"
 id_chart = "id:chart"
 
+# Globals
+#
+
 # serial device handles
-rfid_serial = ""
-chart_serial = ""
+serial = {'rfid': {'live': False}, 
+          'chart': {'live': False}}
 
 # timers
 chart_timer = ""
@@ -52,24 +59,33 @@ chart_timer = ""
 # #browser.driver.manage().window().fullscreen()
 # browser.get(default_url)
 
+#
+# Client locating and setup
+#
+
+def is_port_active(port):
+    """Check if given port is active"""
+    #print "Checking if %s is active:" % (port),
+    return os.path.exists(port)
+
 def get_active_usb_ports():
     """Search usb ports and find out which ones are active, returning a list"""
     usb_list = []
-    for port_num in range(10):
-        usb_port = "/dev/ttyUSB" + str(port_num)
-        print "Checking if %s is active:" % (usb_port),
-        if os.path.exists(usb_port):
-            print "Yes"
+    # we look for up to max_ports usb ports
+    for port_num in range(max_usb_ports):
+        usb_port = usb_port_prefix + str(port_num)
+        if is_port_active(usb_port):
             usb_list.append(usb_port)
-        else:
-            print "No"
     return usb_list
 
 def request_id(port):
-    """Send an ID request to the serial and return the ID we get"""
+    """Send an ID request to a serial port and return the ID we get"""
+    # set up a serial port temporarily
     ser = serial.Serial(port, 9600, timeout=serial_timeout)
+    # clear the buffers - TODO: Does this actually do it?
     ser.reset_input_buffer()
     ser.reset_output_buffer()
+    # we ask several times until we get an answer
     for i in range(max_retries):
         ser.write(req_id)
         sleep(retry_delay)
@@ -82,7 +98,8 @@ def request_id(port):
     return response
 
 def setup_serial():
-    global rfid_serial, chart_serial
+    """Set up all of our serial ports connected to our devices"""
+    print "Checking for active ports"
     usb_ports = get_active_usb_ports()
     if not usb_ports:
         print "ERROR: No active USB port found"
@@ -91,16 +108,31 @@ def setup_serial():
         print "Setting up:", port,
         response = request_id(port)
         print "Response:", response,
+        #
+        # if device IDs as our rfid reader
         if (id_rfid in response):
-            rfid_serial = serial.Serial(port, 9600, timeout=.5)
+            serial['rfid']['handle'] = serial.Serial(port, 9600, timeout=.5)
+            serial['rfid']['port'] = port
+            serial['rfid']['live'] = True
             print "RFID Reader"
+        #
+        # if device IDs as our chart recorder
         elif (id_chart in response):
-            chart_serial = serial.Serial(port, 9600, timeout=.5)
+            serial['chart']['handle'] = serial.Serial(port, 9600, timeout=.5)
+            serial['chart']['port'] = port
+            serial['chart']['live'] = True
             print "Chart recorder"
+        #
+        # if device IDs as anything else
         else:
             print "Unknown"
 
-def tell_client(ser, text):
+#
+# client communication
+#
+
+def tell_client(device, text):
+    ser = serial[device]['handle']
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     for i in range(max_retries):
@@ -132,15 +164,15 @@ def start_chart(time):
     # first we cancel any timer we've set before
     if (chart_timer):
         chart_timer.cancel()
-        print "Cancelling old timer"
-    results = tell_client(chart_serial, req_start)
-    print "Start chart recorder:", results
+        print "Canceling old timer"
+    results = tell_client('chart', req_start)
+    print "Start chart recorder sez:", results
     chart_timer = threading.Timer(time, stop_chart).start()
 
 def stop_chart():
     """Stops the chart recorder"""
-    results = tell_client(chart_serial, req_stop)
-    print "Stop chart recorder:", results
+    results = tell_client('chart', req_stop)
+    print "Stop chart recorder sez:", results
 
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
@@ -149,48 +181,46 @@ def trigger_actions(data):
 
 def main():
     setup_serial()
-    if not rfid_serial:
-        print "FATAL ERROR: No RFID reader found."
-        exit()
-    if not chart_serial:
-        print "WARNING: No chart reader found."
-
-    print "Begin listening for RFID"
     # This is our main loop that listens and responds
     while 1 :
-        # do we have data on the input buffer waiting
-        if rfid_serial.in_waiting > 0:
-            # if we send the same rfid multiple times
-            #   in theory they should all be the same,
-            #   but in practice we are sometimes missing bytes.
-            #   Thus we send it multiple times to guard against data loss
-            rfid_good = ""
-            count = 0
-            # we keep looking if we have something waiting
-            #   AND we haven't exceeded our count
-            #   AND we haven't already rec'd a good rfid
-            while (rfid_serial.in_waiting > 0 and count < rfid_send_count and 
-                   not rfid_good):
-                rfid_in = rfid_serial.readline().strip()
-                # if the rfid has the proper length,
-                # we can trust it
-                if len(rfid_in) == rfid_length:
-                    rfid_good = rfid_in
-                    print "    Received good RFID:", rfid_in
-                    break
-                else:
-                    print "    Received bad RFID:", rfid_in
-
-            if rfid_good:
-                print "RFID found:", rfid_good
-                data = get_rfid_data(rfid_good)
-                display_found_object(data)
-                trigger_actions(data)
-
-            # clear incoming buffer in case we have stuff waiting
-            rfid_serial.reset_input_buffer()
-
-            print "Begin listening for RFID"
+        if not is_port_active(serial['chart']['port']):
+            print "WARNING: No chart reader found."
+            #TODO: Keep looking for chart reader device
+        if not is_port_active(serial['rfid']['port']):
+            print "ERROR: No RFID reader found."
+            #TODO: Hold everything; keep looking for rfid device
+        else:
+            rfid_serial = serial['rfid']['handle']
+            # do we have data on the input buffer waiting
+            if rfid_serial.in_waiting > 0:
+                # if we send the same rfid multiple times
+                #   in theory they should all be the same,
+                #   but in practice we are sometimes missing bytes.
+                #   Thus we send it multiple times to guard against data loss
+                rfid_good = ""
+                count = 0
+                # we keep looking if we have something waiting
+                #   AND we haven't exceeded our count
+                #   AND we haven't already rec'd a good rfid
+                while (rfid_serial.in_waiting > 0 and count < rfid_send_count and 
+                       not rfid_good):
+                    rfid_in = rfid_serial.readline().strip()
+                    # if the rfid has the proper length,
+                    # we can trust it
+                    if len(rfid_in) == rfid_length:
+                        rfid_good = rfid_in
+                        print "    Received good RFID:", rfid_in
+                        break
+                    else:
+                        print "    Received bad RFID:", rfid_in
+                if rfid_good:
+                    print "RFID found:", rfid_good
+                    data = get_rfid_data(rfid_good)
+                    display_found_object(data)
+                    trigger_actions(data)
+                # clear incoming buffer in case we have stuff waiting
+                rfid_serial.reset_input_buffer()
+                print "Continue listening for RFID"
 
 
 if __name__=='__main__':

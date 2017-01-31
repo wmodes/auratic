@@ -13,8 +13,10 @@ int rfidLen = 41;
 int rfidByteCount = 14;
 int rfidCount = 3;
 
-String id_req = "id";
-String id_response = "id:rfid";
+String reqId = "id";
+String rspId = "id:rfid";
+String reqHandshake = "hello?"
+String rspHandshake = "hello!"
 
 void setup()
 {
@@ -25,7 +27,7 @@ void setup()
     pinMode(led, OUTPUT);
 }
 
-int find_text(String needle, String haystack) {
+int findText(String needle, String haystack) {
   int foundpos = -1;
   for (int i = 0; i <= haystack.length() - needle.length(); i++) {
     if (haystack.substring(i,needle.length()+i) == needle) {
@@ -37,23 +39,31 @@ int find_text(String needle, String haystack) {
 
 void loop()
 {
-  // create a string array to put our full RFID
-  char fullId[rfidLen];
-  fullId[0] = '\0';
   // do we have a request from the master?
   if (Serial.available() > 0) 
   {
-    String master_req = Serial.readString();
+    // get request from USB port
+    String reqMaster = Serial.readString();
     //Serial.print("We received: ");
-    //Serial.println(master_req);
-    if (find_text(id_req, master_req) >= 0) {
+    //Serial.println(reqMaster);
+    //
+    // did we receive a HANDSHAKE request?
+    if (findText(reqHandshake, master_req) >= 0) {
+      Serial.println(reqHandshake);
+      activated = false;
+    }
+    // did we receive an ID request?
+    else if (findText(reqId, reqMaster) >= 0) {
       //Serial.print("We sent: ");
-      Serial.println(id_response);
+      Serial.println(rspId);
     }
   }
   // do we have a digit waiting?
   if (RFID.available() > 0) 
   {
+    // create a string array to put our full RFID
+    char fullId[rfidLen];
+    fullId[0] = '\0';
     // Yes! Great, let's get 14 of them
     for(int i = 0; i < rfidByteCount; i++) {
       // read new digit
