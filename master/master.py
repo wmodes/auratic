@@ -185,10 +185,16 @@ def main():
     # This is our main loop that listens and responds
     while 1 :
         if not is_port_active(device['chart']['port']):
-            print "WARNING: No chart reader found."
+            #device['chart']['live'] = False
+            # every 10 seconds, we report this
+            if not bool(int(time()*10) % 100):
+                print "WARNING: No chart reader found."
             #TODO: Keep looking for chart reader device
         if not is_port_active(device['rfid']['port']):
-            print "ERROR: No RFID reader found."
+            #device['rfid']['live'] = False
+            # every 10 seconds, we report this
+            if not bool(int(time()*10) % 100):
+                print "ERROR: No RFID reader found."
             #TODO: Hold everything; keep looking for rfid device
         else:
             rfid_device = device['rfid']['handle']
