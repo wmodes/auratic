@@ -115,7 +115,9 @@ def setup_serial():
     print "Checking for active ports"
     usb_ports = get_active_usb_ports()
     if not usb_ports:
-        print "ERROR: No active USB port found"
+        if (int(time()) > last_report_time+10):
+            print "ERROR: No active devices found"
+            last_report_time = int(time())
     for port in usb_ports:
         print "Setting up:", port,
         response = request_id(port)
