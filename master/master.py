@@ -122,12 +122,14 @@ def setup_serial():
     for port in usb_ports:
         print "Setting up:", port,
         response = request_id(port)
-        print "Response:", response,
+        print "ID:", response, 
         #
         # look through our list of expected devices
         for device in devices:
+            print devices[device]['id'] + '?',
             # if device IDs as this device
             if (devices[device]['id'] in response):
+                print "yes"
                 # asign a serial handle
                 devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
                 # assign the port name
@@ -135,12 +137,14 @@ def setup_serial():
                 # mark is as currently live
                 devices[device]['status'] = 'live'
                 # print the name to console
-                print devices[device]['name']
+                print "Device:", devices[device]['name']
                 # we don't need to look through the rest
                 break
             # if device IDs as anything else
             else:
-                print "Unknown"
+                print "No",
+        #print "Unknown"
+
 
 def check_if_all_devices_live():
     global last_report_time
