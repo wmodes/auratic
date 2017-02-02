@@ -148,6 +148,7 @@ def setup_serial():
 
 def check_if_all_devices_live():
     global last_report_time
+    device_missing = False
     for device in devices:
         if not is_port_active(devices[device]['port']):
             #devices['chart']['live'] = False
