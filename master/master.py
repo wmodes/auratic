@@ -24,7 +24,7 @@ rfid_length = 43
 max_retries = 20
 retry_delay = 0.5
 serial_timeout = 0.5
-report_interval = 1000
+report_interval = 5000
 
 # communication protocols
 req_id = "id"
