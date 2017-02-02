@@ -93,22 +93,24 @@ def get_active_usb_ports():
 
 def request_id(port):
     """Send an ID request to a serial port and return the ID we get"""
-    # set up a serial port temporarily
-    ser = serial.Serial(port, 9600, timeout=serial_timeout)
-    # clear the buffers - TODO: Does this actually do it?
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
-    # we ask several times until we get an answer
-    for i in range(max_retries):
-        ser.write(req_id)
-        sleep(retry_delay)
-        waiting = ser.inWaiting()
-        response = ser.readline().strip()
-        # print "Serial Try", i, "=", response, "waiting:", waiting
-        if response:
-            break
-        sleep(retry_delay)
-    return response
+    # we only want to check port if it is still active
+    if (is_port_active(port)):
+        # set up a serial port temporarily
+        ser = serial.Serial(port, 9600, timeout=serial_timeout)
+        # clear the buffers - TODO: Does this actually do it?
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
+        # we ask several times until we get an answer
+        for i in range(max_retries):
+            ser.write(req_id)
+            sleep(retry_delay)
+            waiting = ser.inWaiting()
+            response = ser.readline().strip()
+            # print "Serial Try", i, "=", response, "waiting:", waiting
+            if response:
+                break
+            sleep(retry_delay)
+        return response
 
 def setup_serial():
     global last_report_time
