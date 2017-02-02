@@ -24,6 +24,7 @@ rfid_length = 43
 max_retries = 20
 retry_delay = 0.5
 serial_timeout = 0.5
+reporting_interval = 5
 
 # communication protocols
 req_id = "id"
@@ -40,7 +41,7 @@ id_chart = "id:chart"
 # Globals
 #
 
-last_report_time = int(time()) - 10
+last_report_interval = int(time()) - 10
 
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
@@ -180,11 +181,14 @@ def get_rfid_data(rfid):
 # Outside world actions & communication
 #
 
+def increment_reporting_interval(reporting_interval):
+    global last_report_interval
+    if (int(time()) > last_report_interval+reporting_interval):
+        last_report_interval = int(time())
+
 def report_at_intervals(text):
-    global last_report_time
-    if (int(time()) > last_report_time+10):
+    if (int(time()) > last_report_interval+reporting_interval):
         print text
-        last_report_time = int(time())
 
 def display_found_object(data):
     title = data["title"]
@@ -219,6 +223,7 @@ def main():
     setup_serial()
     # This is our main loop that listens and responds
     while 1 :
+        increment_reporting_interval(reporting_interval)
         # check if all of our devices are active
         all_live = check_if_all_devices_live()
         if (not all_live):
