@@ -77,7 +77,7 @@ chart_timer = ""
 def is_port_active(port):
     """Check if given port is active"""
     if (port):
-        print "Checking if %s is active:" % (port)
+        #print "Checking if %s is active:" % (port)
         # we use a system call to see if this serial handle exists
         return os.path.exists(port)
 
