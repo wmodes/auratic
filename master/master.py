@@ -186,7 +186,8 @@ def get_rfid_data(rfid):
 
 def report_at_intervals(text):
     # if now is greater than our last report time + an interval
-    if (time() > last_report_time[text] + report_interval):
+    if (text not in last_report_time or
+            time() > last_report_time[text] + report_interval):
         print text
         last_report_time[text] = time()
 
