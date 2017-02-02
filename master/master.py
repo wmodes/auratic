@@ -226,6 +226,7 @@ def main():
         # we can proceed as long as the rfid device is active
         if (devices['rfid']['status'] == 'live'):
             try:
+                report_at_intervals("Listening for RFID")
                 rfid_device = devices['rfid']['handle']
                 # do we have data on the input buffer waiting
                 if rfid_device.in_waiting > 0:
