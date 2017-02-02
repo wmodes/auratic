@@ -113,16 +113,13 @@ def request_id(port):
         return response
 
 def setup_serial():
-    global last_report_time
     """Set up all of our serial ports connected to our devices"""
     #print "Checking for active ports"
     usb_ports = get_active_usb_ports()
     # pause a moment to make sure system has set up the serial ports we've found
     sleep(1)
     if not usb_ports:
-        if (int(time()) > last_report_time+10):
-            print "ERROR: No active devices found"
-            last_report_time = int(time())
+        report_at_intervals("ERROR: No active devices found")
     for port in usb_ports:
         response = request_id(port)
         #
@@ -144,15 +141,12 @@ def setup_serial():
                     break
 
 def check_if_all_devices_live():
-    global last_report_time
     device_missing = False
     for device in devices:
         if not is_port_active(devices[device]['port']):
             #devices['chart']['live'] = False
             # every 10 seconds, we report this
-            if (int(time()) > last_report_time+10):
-                print "WARNING: No %s found." % devices[device]['name']
-                last_report_time = int(time())
+            report_at_intervals("WARNING: No %s found." % devices[device]['name'])
             devices[device]['status'] == 'missing'
             device_missing = True
     if (device_missing):
@@ -181,6 +175,16 @@ def get_rfid_data(rfid):
     if rfid not in object_db:
         rfid = "default"
     return object_db[rfid]
+
+#
+# Outside world actions & communication
+#
+
+def report_at_intervals(text):
+    global last_report_time
+    if (int(time()) > last_report_time+10):
+        print text
+        last_report_time = int(time())
 
 def display_found_object(data):
     title = data["title"]
@@ -221,47 +225,47 @@ def main():
             setup_serial()
         # we can proceed as long as the rfid device is active
         if (devices['rfid']['status'] == 'live'):
-            rfid_device = devices['rfid']['handle']
-            # do we have data on the input buffer waiting
-            if rfid_device.in_waiting > 0:
-                # if we send the same rfid multiple times
-                #   in theory they should all be the same,
-                #   but in practice we are sometimes missing bytes.
-                #   Thus we send it multiple times to guard against data loss
-                rfid_good = ""
-                count = 0
-                # we keep looking if we have something waiting
-                #   AND we haven't exceeded our count
-                #   AND we haven't already rec'd a good rfid
-                while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
-                       not rfid_good):
-                    rfid_in = rfid_device.readline().strip()
-                    # if the rfid has the proper length,
-                    # we can trust it
-                    if len(rfid_in) == rfid_length:
-                        rfid_good = rfid_in
-                        print "    Received good RFID:", rfid_in
-                        break
-                    else:
-                        print "    Received bad RFID:", rfid_in
-                if rfid_good:
-                    print "RFID found:", rfid_good
-                    data = get_rfid_data(rfid_good)
-                    display_found_object(data)
-                    trigger_actions(data)
-                # clear incoming buffer in case we have stuff waiting
-                rfid_device.reset_input_buffer()
-                print "Continue listening for RFID"
-
+            try:
+                rfid_device = devices['rfid']['handle']
+                # do we have data on the input buffer waiting
+                if rfid_device.in_waiting > 0:
+                    # if we send the same rfid multiple times
+                    #   in theory they should all be the same,
+                    #   but in practice we are sometimes missing bytes.
+                    #   Thus we send it multiple times to guard against data loss
+                    rfid_good = ""
+                    count = 0
+                    # we keep looking if we have something waiting
+                    #   AND we haven't exceeded our count
+                    #   AND we haven't already rec'd a good rfid
+                    while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
+                           not rfid_good):
+                        rfid_in = rfid_device.readline().strip()
+                        # if the rfid has the proper length,
+                        # we can trust it
+                        if len(rfid_in) == rfid_length:
+                            rfid_good = rfid_in
+                            print "    Received good RFID:", rfid_in
+                            break
+                        else:
+                            print "    Received bad RFID:", rfid_in
+                    if rfid_good:
+                        print "RFID found:", rfid_good
+                        data = get_rfid_data(rfid_good)
+                        display_found_object(data)
+                        trigger_actions(data)
+                    # clear incoming buffer in case we have stuff waiting
+                    rfid_device.reset_input_buffer()
+                    print "Continue listening for RFID"
+            except IOError:
+                print "Lost RFID device"
+                continue
+            break
 
 if __name__=='__main__':
-    try:     
+    # try:     
         # Enter the main loop
-        main()
-    except IOError, e:
-        print e.errno
-        print e
-        main()
+    main()
     # except Exception as e: 
     #     print ""
     #     print str(e)
