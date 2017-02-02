@@ -111,6 +111,7 @@ def request_id(port):
     return response
 
 def setup_serial():
+    global last_report_time
     """Set up all of our serial ports connected to our devices"""
     print "Checking for active ports"
     usb_ports = get_active_usb_ports()
