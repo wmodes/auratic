@@ -255,9 +255,13 @@ def main():
 
 
 if __name__=='__main__':
-    # try:     
+    try:     
         # Enter the main loop
-    main()
+        main()
+    except IOError, e:
+        print e.errno
+        print e
+        main()
     # except Exception as e: 
     #     print ""
     #     print str(e)
