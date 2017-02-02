@@ -116,37 +116,31 @@ def setup_serial():
     #print "Checking for active ports"
     usb_ports = get_active_usb_ports()
     # pause a moment to make sure system has set up the serial ports we've found
-    sleep(0.5)
+    sleep(1)
     if not usb_ports:
         if (int(time()) > last_report_time+10):
             print "ERROR: No active devices found"
             last_report_time = int(time())
     for port in usb_ports:
-        print "Setting up:", port,
         response = request_id(port)
-        print "ID:", response, 
         #
         # look through our list of expected devices
         for device in devices:
-            print devices[device]['id'] + '?',
-            # if device IDs as this device
-            if (devices[device]['id'] in response):
-                print "yes"
-                # asign a serial handle
-                devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
-                # assign the port name
-                devices[device]['port'] = port
-                # mark is as currently live
-                devices[device]['status'] = 'live'
-                # print the name to console
-                print "Device:", devices[device]['name']
-                # we don't need to look through the rest
-                break
-            # if device IDs as anything else
-            else:
-                print "No",
-        #print "Unknown"
-
+            # we only look at devices that are not already live
+            if (devices[device]['status'] != 'live'):
+                print devices[device]['id'] + '?',
+                # if device IDs as this device
+                if (devices[device]['id'] in response):
+                    print "Setting up: %s ID: %s Device: %s" %
+                            (port, response, devices[device]['name'])
+                    # asign a serial handle
+                    devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
+                    # assign the port name
+                    devices[device]['port'] = port
+                    # mark is as currently live
+                    devices[device]['status'] = 'live'
+                    # we don't need to look through the rest
+                    break
 
 def check_if_all_devices_live():
     global last_report_time
