@@ -40,7 +40,7 @@ id_chart = "id:chart"
 # Globals
 #
 
-last_report_time = int(time())
+last_report_time = int(time()) - 10
 
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
