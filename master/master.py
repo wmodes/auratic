@@ -27,9 +27,9 @@ serial_timeout = 0.5
 
 # communication protocols
 req_id = "id"
-req_start = "start";
-req_stop = "stop";
-rsp_ack = "ack";
+req_start = "start"
+req_stop = "stop"
+rsp_ack = "ack"
 req_handshake =  "hello?"
 rsp_handshake =  "hello!"
 
@@ -41,8 +41,17 @@ id_chart = "id:chart"
 #
 
 # serial device handles
-device = {'rfid': {'port':'', 'live':False}, 
-          'chart': {'port':'', 'live':False}}
+devices = {'rfid': {'name':     'RFID Reader',
+                    'id':       'id:rfid'
+                    'status':   'init',
+                    'port':     ''
+                    }, 
+          'chart': {'name':     'Chart Recorder',
+                    'id':       'id:chart'
+                    'status':   'init',
+                    'port':     ''
+                    }
+           }
 
 # timers
 chart_timer = ""
@@ -60,13 +69,14 @@ chart_timer = ""
 # browser.get(default_url)
 
 #
-# Client locating and setup
+# Device locating and setup
 #
 
 def is_port_active(port):
     """Check if given port is active"""
     if (port):
         #print "Checking if %s is active:" % (port),
+        # we use a system call to see if this serial handle exists
         return os.path.exists(port)
 
 def get_active_usb_ports():
@@ -110,30 +120,41 @@ def setup_serial():
         response = request_id(port)
         print "Response:", response,
         #
-        # if device IDs as our rfid reader
-        if (id_rfid in response):
-            device['rfid']['handle'] = serial.Serial(port, 9600, timeout=.5)
-            device['rfid']['port'] = port
-            device['rfid']['live'] = True
-            print "RFID Reader"
-        #
-        # if device IDs as our chart recorder
-        elif (id_chart in response):
-            device['chart']['handle'] = serial.Serial(port, 9600, timeout=.5)
-            device['chart']['port'] = port
-            device['chart']['live'] = True
-            print "Chart recorder"
-        #
-        # if device IDs as anything else
-        else:
-            print "Unknown"
+        # look through our list of expected devices
+        for device in devices:
+            # if device IDs as this device
+            if (devices[device]['id'] in response):
+                # asign a serial handle
+                devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
+                # assign the port name
+                devices[device]['port'] = port
+                # mark is as currently live
+                devices[device]['status'] = 'live'
+                # print the name to console
+                print devices[device]['name']
+                # we don't need to look through the rest
+                break
+            # if device IDs as anything else
+            else:
+                print "Unknown"
+
+def check_if_all_devices_live():
+    for device in devices:
+    if not is_port_active(devices[device]['port']):
+        #devices['chart']['live'] = False
+        # every 10 seconds, we report this
+        if (int(time()) > last_report_time+10):
+            print "WARNING: No %s found." % devices[device]['name']
+            last_report_time = int(time())
+        devices[device]['status'] == 'missing'
+        device_missing = True
 
 #
-# client communication
+# device communication
 #
 
-def tell_client(device, text):
-    ser = device[device]['handle']
+def tell_device(device, text):
+    ser = devices[device]['handle']
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     for i in range(max_retries):
@@ -166,13 +187,13 @@ def start_chart(time):
     if (chart_timer):
         chart_timer.cancel()
         print "Canceling old timer"
-    results = tell_client('chart', req_start)
+    results = tell_device('chart', req_start)
     print "Start chart recorder sez:", results
     chart_timer = threading.Timer(time, stop_chart).start()
 
 def stop_chart():
     """Stops the chart recorder"""
-    results = tell_client('chart', req_stop)
+    results = tell_device('chart', req_stop)
     print "Stop chart recorder sez:", results
 
 def trigger_actions(data):
@@ -185,22 +206,13 @@ def main():
     # This is our main loop that listens and responds
     last_report_time = int(time())
     while 1 :
-        if not is_port_active(device['chart']['port']):
-            #device['chart']['live'] = False
-            # every 10 seconds, we report this
-            if (int(time()) > last_report_time+10):
-                print "WARNING: No chart reader found."
-                last_report_time = int(time())
-            #TODO: Keep looking for chart reader device
-        if not is_port_active(device['rfid']['port']):
-            #device['rfid']['live'] = False
-            # every 10 seconds, we report this
-            if (int(time()) > last_report_time+10):
-                print "ERROR: No RFID reader found."
-                last_report_time = int(time())
-            #TODO: Hold everything; keep looking for rfid device
-        else:
-            rfid_device = device['rfid']['handle']
+        # check if all of our devices are active
+        all_live = check_if_all_devices_live()
+        if (not all_live):
+            setup_serial()
+        # we can proceed as long as the rfid device is active
+        if (devices['rfid']['status'] == 'live'):
+            rfid_device = devices['rfid']['handle']
             # do we have data on the input buffer waiting
             if rfid_device.in_waiting > 0:
                 # if we send the same rfid multiple times
