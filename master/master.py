@@ -40,6 +40,8 @@ id_chart = "id:chart"
 # Globals
 #
 
+last_report_time = int(time())
+
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
                     'id':       'id:rfid',
@@ -203,7 +205,6 @@ def trigger_actions(data):
 def main():
     setup_serial()
     # This is our main loop that listens and responds
-    last_report_time = int(time())
     while 1 :
         # check if all of our devices are active
         all_live = check_if_all_devices_live()
