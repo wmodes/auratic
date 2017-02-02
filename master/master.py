@@ -128,7 +128,6 @@ def setup_serial():
         for device in devices:
             # we only look at devices that are not already live
             if (devices[device]['status'] != 'live'):
-                print devices[device]['id'] + '?',
                 # if device IDs as this device
                 if (devices[device]['id'] in response):
                     print "Setting up: %s ID: %s Device: %s" % (port, 
