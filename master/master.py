@@ -260,7 +260,6 @@ def main():
             except IOError:
                 print "Lost RFID device"
                 continue
-            break
 
 if __name__=='__main__':
     # try:     
