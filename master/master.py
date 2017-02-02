@@ -42,12 +42,12 @@ id_chart = "id:chart"
 
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
-                    'id':       'id:rfid'
+                    'id':       'id:rfid',
                     'status':   'init',
                     'port':     ''
                     }, 
           'chart': {'name':     'Chart Recorder',
-                    'id':       'id:chart'
+                    'id':       'id:chart',
                     'status':   'init',
                     'port':     ''
                     }
@@ -140,14 +140,14 @@ def setup_serial():
 
 def check_if_all_devices_live():
     for device in devices:
-    if not is_port_active(devices[device]['port']):
-        #devices['chart']['live'] = False
-        # every 10 seconds, we report this
-        if (int(time()) > last_report_time+10):
-            print "WARNING: No %s found." % devices[device]['name']
-            last_report_time = int(time())
-        devices[device]['status'] == 'missing'
-        device_missing = True
+        if not is_port_active(devices[device]['port']):
+            #devices['chart']['live'] = False
+            # every 10 seconds, we report this
+            if (int(time()) > last_report_time+10):
+                print "WARNING: No %s found." % devices[device]['name']
+                last_report_time = int(time())
+            devices[device]['status'] == 'missing'
+            device_missing = True
 
 #
 # device communication
