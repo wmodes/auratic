@@ -75,7 +75,7 @@ chart_timer = ""
 def is_port_active(port):
     """Check if given port is active"""
     if (port):
-        #print "Checking if %s is active:" % (port),
+        print "Checking if %s is active:" % (port)
         # we use a system call to see if this serial handle exists
         return os.path.exists(port)
 
@@ -114,7 +114,6 @@ def setup_serial():
     usb_ports = get_active_usb_ports()
     if not usb_ports:
         print "ERROR: No active USB port found"
-        exit()
     for port in usb_ports:
         print "Setting up:", port,
         response = request_id(port)
