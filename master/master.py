@@ -153,6 +153,9 @@ def check_if_all_devices_live():
                 last_report_time = int(time())
             devices[device]['status'] == 'missing'
             device_missing = True
+    if (device_missing):
+        return False
+    return True
 
 #
 # device communication
