@@ -54,7 +54,7 @@ devices = {'rfid': {'name':     'RFID Reader',
                     'port':     '',
                     'sort':     1
                     }, 
-          'chart1': {'name':    'Chart Recorder',
+          'chart1': {'name':    'Chart Recorder 1',
                     'id':       'id:chart',
                     'fault':    'warn',
                     'status':   'init',
@@ -150,7 +150,7 @@ def setup_serial():
                         # if device IDs as this device
                         response = request_id_from_device(port)
                         if (device['id'] in response):
-                            print "Setting up '%s', ID: '%s', Port: '%s'" % (device['name'], 
+                            print "Setting up %s, ID: %s, Port: %s" % (device['name'], 
                                     response, port)
                             # asign a serial handle
                             device['handle'] = serial.Serial(port, 9600, timeout=.5)
@@ -182,10 +182,10 @@ def all_devices_live():
             #devices['chart']['live'] = False
             if (device['fault'] == "critical"):
                 # at intervals we report this
-                report_at_intervals("CRITICAL: No %s found." % device['name'])
+                report_at_intervals("CRITICAL: %s found." % device['name'])
             elif (device['fault'] == "warn"):
                 # at intervals we report this
-                report_at_intervals("WARNING: No %s found." % device['name'])
+                report_at_intervals("WARNING: %s found." % device['name'])
             # set status for this device
             device['status'] == 'missing'
             # unassign port
