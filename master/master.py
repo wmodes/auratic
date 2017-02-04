@@ -150,8 +150,8 @@ def setup_serial():
                         # if device IDs as this device
                         response = request_id_from_device(port)
                         if (device['id'] in response):
-                            print "Setting up: '%s' ID: '%s' Device: '%s'" % (port, 
-                                    response, device['name'])
+                            print "Setting up '%s', ID: '%s', Port: '%s'" % (device['name'], 
+                                    response, port)
                             # asign a serial handle
                             device['handle'] = serial.Serial(port, 9600, timeout=.5)
                             # assign the port name
