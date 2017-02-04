@@ -17,15 +17,14 @@ import threading
 
 # Constants
 #
-usb_port_prefix = "/dev/ttyUSB"
+DEBUG = 1
+usb_port_prefix="/dev/ttyUSB"
 max_usb_ports = 12
 rfid_send_count = 3
 rfid_length = 43
 max_retries = 20
 retry_delay = 0.5
 serial_timeout = 0.5
-
-DEBUG = 1
 
 # communication protocols
 req_id = "id"
@@ -47,6 +46,12 @@ id_chart = "id:chart"
 last_report_time = {}
 # report interval in seconds
 report_interval = 5
+
+# we only report each DEBUG msg periodically,
+# so we keep a record of last debug time
+last_debug_time = {}
+# report interval in seconds
+debug_interval = 1
 
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
@@ -244,8 +249,11 @@ def get_rfid_data(rfid):
 
 def debug(text, level):
     if (DEBUG >= level):
-        print text
-    sleep(0.25)
+        # if now is greater than our last debug time + an interval
+        if (text not in last_debug_time or
+                time() > last_debug_time[text] + debug_interval):
+            print text
+            last_debug_time[text] = time()
 
 def report_at_intervals(text):
     # if now is greater than our last report time + an interval
