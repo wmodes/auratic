@@ -145,7 +145,7 @@ def setup_serial():
             report_at_intervals("ERROR: No active devices found")
         for port in usb_ports:
             debug("setup_serial(): Active ports: " + str(usb_ports), 1)
-            debug("setup_serial(): Registered ports: " + assigned_ports, 1)
+            debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
             # if this port isn't already assigned
             if (port not in assigned_ports):
                 debug("setup_serial(): Unassigned port: " + port, 1)
