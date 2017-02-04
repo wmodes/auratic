@@ -25,6 +25,8 @@ max_retries = 20
 retry_delay = 0.5
 serial_timeout = 0.5
 
+DEBUG = 1
+
 # communication protocols
 req_id = "id"
 req_start = "start"
@@ -142,15 +144,19 @@ def setup_serial():
         if not usb_ports:
             report_at_intervals("ERROR: No active devices found")
         for port in usb_ports:
+            debug("setup_serial(): Active ports" + str(usb_ports), 1)
             # if this port isn't already assigned
             if (port not in assigned_ports):
+                debug("setup_serial(): Unassigned port: " + port, 1)
                 #
                 # look through our list of expected devices
                 for device in sorted(devices.values(), key=lambda x: x['sort']):
                     # if the device is not already live and
                     if (device['status'] != 'live'):
+                        debug("setup_serial(): Unassigned device: " + device['name'], 1)
                         # if device IDs as this device
                         response = request_id_from_device(port)
+                        debug("setup_serial(): Response: " + response, 1)
                         if (device['id'] in response):
                             print "Setting up %s, ID: %s, Port: %s" % (device['name'], 
                                     response, port)
@@ -234,6 +240,10 @@ def get_rfid_data(rfid):
 #
 # Outside world actions & communication
 #
+
+def debug(text, level):
+    if (DEBUG > level):
+        print text
 
 def report_at_intervals(text):
     # if now is greater than our last report time + an interval
