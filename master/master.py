@@ -168,6 +168,7 @@ def setup_serial():
             # we continue looking through the active ports
     except IOError:
         print "WARNING: Setup error, retrying"
+        sleep(1)
         setup_serial()
 
 def all_devices_live():
