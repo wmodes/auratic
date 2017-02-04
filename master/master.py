@@ -102,7 +102,7 @@ def is_port_active(port):
     """Check if given port is active. 
     Note if no part is passed, it returns False"""
     if (port):
-        #print "Checking if %s is active:" % (port)
+        #report("Checking if %s is active:" % (port))
         # we use a system call to see if this serial handle exists
         return os.path.exists(port)
 
@@ -131,7 +131,7 @@ def request_id_from_device(port):
             sleep(retry_delay)
             waiting = ser.inWaiting()
             response = ser.readline().strip()
-            # print "Serial Try", i, "=", response, "waiting:", waiting
+            # report("Serial Try", i, "=", response, "waiting:", waiting)
             if response:
                 break
             sleep(retry_delay)
@@ -141,13 +141,13 @@ def request_id_from_device(port):
 
 def setup_serial():
     """Set up all of our serial ports connected to our devices"""
-    #print "Checking for active ports"
+    #report("Checking for active ports")
     try:
         usb_ports = get_active_usb_ports()
         # pause a moment to make sure system has set up the serial ports we've found
         # sleep(1)        # needed?
         if not usb_ports:
-            report("ERROR: No active devices found")
+            update("ERROR: No active devices found")
         for port in usb_ports:
             debug("setup_serial(): Active ports: " + str(usb_ports), 1)
             debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
@@ -164,8 +164,8 @@ def setup_serial():
                         response = request_id_from_device(port)
                         debug("setup_serial(): Response: " + response, 1)
                         if (device['id'] in response):
-                            print "Setting up %s, ID: %s, Port: %s" % (device['name'], 
-                                    response, port)
+                            report("Setting up %s, ID: %s, Port: %s" % (device['name'], 
+                                    response, port))
                             # asign a serial handle
                             device['handle'] = serial.Serial(port, 9600, timeout=.5)
                             # assign the port name
@@ -179,7 +179,7 @@ def setup_serial():
                             break
             # we continue looking through the active ports
     except IOError:
-        print "WARNING: Setup error, retrying"
+        report("WARNING: Setup error, retrying")
         sleep(1)
         setup_serial()
 
@@ -197,10 +197,10 @@ def all_devices_live():
             #devices['chart']['live'] = False
             if (device['fault'] == "critical"):
                 # at intervals we report this
-                report("CRITICAL: %s disconnected." % device['name'])
+                update("CRITICAL: %s disconnected." % device['name'])
             elif (device['fault'] == "warn"):
                 # at intervals we report this
-                report("WARNING: %s disconnected." % device['name'])
+                update("WARNING: %s disconnected." % device['name'])
             # set status for this device
             device['status'] == 'missing'
             # unassign port
@@ -233,7 +233,7 @@ def tell_device(device, text):
         sleep(retry_delay)
         waiting = ser.inWaiting()
         response = ser.readline().strip()
-        # print "Serial Try", i, "=", response, "waiting:", waiting
+        # report("Serial Try", i, "=", response, "waiting:", waiting)
         if rsp_ack in response:
             return response
         sleep(retry_delay)
@@ -247,27 +247,36 @@ def get_rfid_data(rfid):
 # Outside world actions & communication
 #
 
+def report(*args):
+    """immediately report information.
+    Note: Accepts multiple arguments"""
+    text = " ".join(list(map(str, args)))
+    print text
+
 def debug(text, level):
     if (DEBUG >= level):
         # if now is greater than our last debug time + an interval
         if (text not in last_debug_time or
                 time() > last_debug_time[text] + debug_interval):
-            print "DEBUG: " + text
+            report("DEBUG: " + text)
             last_debug_time[text] = time()
 
-def report(text):
+def update(*args):
+    """periodically report information at report_interval seconds.
+    Note: Accepts multiple arguments"""
+    text = " ".join(list(map(str, args)))
     # if now is greater than our last report time + an interval
     if (text not in last_report_time or
             time() > last_report_time[text] + report_interval):
-        print text
+        report(text)
         last_report_time[text] = time()
 
 def display_found_object(data):
     title = data["title"]
     category = data["category"]
     url = youtube_url + data["video"] + youtube_post
-    print "This is a", title
-    print "Showing video", url
+    report("This is a", title)
+    report("Showing video", url)
     # browser.get(url)
 
 def start_chart(time):
@@ -276,15 +285,15 @@ def start_chart(time):
     # first we cancel any timer we've set before
     if (chart_timer):
         chart_timer.cancel()
-        print "Canceling old timer"
+        report("Canceling old timer")
     results = tell_device('chart', req_start)
-    print "Start chart recorder sez:", results
+    report("Start chart recorder sez:", results)
     chart_timer = threading.Timer(time, stop_chart).start()
 
 def stop_chart():
     """Stops the chart recorder"""
     results = tell_device('chart', req_stop)
-    print "Stop chart recorder sez:", results
+    report("Stop chart recorder sez:", results)
 
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
@@ -295,7 +304,7 @@ def do_the_things():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
     try:
-        report("Listening for RFID")
+        update("Listening for RFID")
         rfid_device = devices['rfid']['handle']
         # do we have data on the input buffer waiting
         if rfid_device.in_waiting > 0:
@@ -315,20 +324,20 @@ def do_the_things():
                 # we can trust it
                 if len(rfid_in) == rfid_length:
                     rfid_good = rfid_in
-                    print "    Received good RFID:", rfid_in
+                    report("    Received good RFID:", rfid_in)
                     break
                 else:
-                    print "    Received bad RFID:", rfid_in
+                    report("    Received bad RFID:", rfid_in)
             if rfid_good:
-                print "RFID found:", rfid_good
+                report("RFID found:", rfid_good)
                 data = get_rfid_data(rfid_good)
                 display_found_object(data)
                 trigger_actions(data)
             # clear incoming buffer in case we have stuff waiting
             rfid_device.reset_input_buffer()
-            print "Continue listening for RFID"
+            report("Continue listening for RFID")
     except IOError:
-        report("WARNING: Lost RFID device")
+        update("WARNING: Lost RFID device")
 
 def main():
     setup_serial()
@@ -347,8 +356,8 @@ if __name__=='__main__':
         # Enter the main loop
         main()
     except KeyboardInterrupt:
-        print ""
-        print "Exiting."
+        report("")
+        report("Exiting.")
     # except Exception as e: 
     #     print ""
     #     print str(e)
