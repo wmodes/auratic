@@ -182,10 +182,10 @@ def all_devices_live():
             #devices['chart']['live'] = False
             if (device['fault'] == "critical"):
                 # at intervals we report this
-                report_at_intervals("CRITICAL: %s found." % device['name'])
+                report_at_intervals("CRITICAL: %s disconnected." % device['name'])
             elif (device['fault'] == "warn"):
                 # at intervals we report this
-                report_at_intervals("WARNING: %s found." % device['name'])
+                report_at_intervals("WARNING: %s disconnected." % device['name'])
             # set status for this device
             device['status'] == 'missing'
             # unassign port
@@ -320,12 +320,14 @@ def main():
 
 
 if __name__=='__main__':
-    # try:     
+    try:     
         # Enter the main loop
-    main()
+        main()
+    except KeyboardInterrupt:
+        print ""
+        print "Exiting."
     # except Exception as e: 
     #     print ""
     #     print str(e)
     # except:
-    #     print ""
-    #     print "Exiting."
+
