@@ -144,7 +144,7 @@ def setup_serial():
             if (port not in assigned_ports):
                 #
                 # look through our list of expected devices
-                for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
+                for device in sorted(devices.values(), key=lambda x: x['sort']):
                     # if the device is not already live and
                     if (device['status'] != 'live'):
                         # if device IDs as this device
@@ -175,7 +175,7 @@ def all_devices_live():
     Still other devices are optional and will just silently fail."""
     devices_ok = True
     # we iterate over the list of possible devices
-    for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
+    for device in sorted(devices.values(), key=lambda x: x['sort']):
         # check if port is active. Note if we lost the port previously and it is empty
         # is_port_active() returns False
         if not is_port_active(device['port']):
@@ -199,7 +199,7 @@ def all_devices_live():
 def all_critical_devices_live():
     """Quick check if critical devices are live relies on side effects of check_if_all_devices_live()"""
     critical_ok = True
-    for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
+    for device in sorted(devices.values(), key=lambda x: x['sort']):
         if device['fault'] == 'critical' and device['status'] != 'live':
             critical_ok = False
             break
