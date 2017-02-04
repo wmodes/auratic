@@ -153,7 +153,7 @@ def setup_serial():
                 # look through our list of expected devices
                 for device in sorted(devices.values(), key=lambda x: x['sort']):
                     # if the device is not already live and
-                    if (device['status'] != 'live'):
+                    if (not is_port_active(device['port'])):
                         debug("setup_serial(): Unassigned device: " + device['name'], 1)
                         # if device IDs as this device
                         response = request_id_from_device(port)
