@@ -136,7 +136,7 @@ def setup_serial():
     try:
         usb_ports = get_active_usb_ports()
         # pause a moment to make sure system has set up the serial ports we've found
-        sleep(1)        # needed?
+        # sleep(1)        # needed?
         if not usb_ports:
             report_at_intervals("ERROR: No active devices found")
         for port in usb_ports:
