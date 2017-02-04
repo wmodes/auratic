@@ -17,7 +17,7 @@ import threading
 
 # Constants
 #
-DEBUG = 1
+DEBUG = 0
 usb_port_prefix="/dev/ttyUSB"
 max_usb_ports = 12
 rfid_send_count = 3
