@@ -9,6 +9,8 @@ using namespace std;
 
 // CONSTANTS
 
+const bool IDLESWEEP = false;
+
 const int PENMIN = 70;       // minimum alloable rotation of servo
 const int PENMAX = 120;     // maximam allowable rotation of servo
 const int PENAMP = (PENMAX - PENMIN) / 2; // max allowable amplitude
@@ -25,14 +27,15 @@ const int PENSINUSE = 2;    // how many pens are we actually using
 
 String reqId = "id";
 String rspId = "id:chart";
+String reqStatus = "status";
 String reqStart = "start";
 String reqStop = "stop";
 String rspAck = "OK";
-String reqHandshake = "hello?"
-String rspHandshake = "hello!"
+String reqHandshake = "hello?";
+String rspHandshake = "hello!";
 
 // Globals
-boolean activated = false;
+bool activated = false;
 
 // Set up 
 
@@ -45,14 +48,17 @@ Servo servo[PENSINUSE];     // declare an array of server objects
 int datasetPos[PENSINUSE];  // records where we are in the dataset
 
 // a sorta EKG dataset
-int dataset0[] = {75, 65, 75, 100, 75, 100, 75, 50, 
+int dataset0[] = {100};
+
+// a sorta EKG dataset
+int dataset1[] = {75, 65, 75, 100, 75, 100, 75, 50, 
   25, 25, 15, 15, 75, 10, 10, 5, 
   25, 10, 10, 10, 25, 10, 10, 10,
   25, 10, 10, 10, 25, 10, 10, 10
 };
 
 // a sorta heartbeat dataset
-int dataset1[] = {
+int dataset2[] = {
   5, 5, 5, 5, 20, 100, 50, 
   5, 5, 5, 5, 5, 
   5, 5, 5, 5, 5, 
@@ -61,15 +67,18 @@ int dataset1[] = {
 
 int* dataset[] = {
   dataset0,
-  dataset1
+  dataset1,
+  dataset2
 };
 
 int datalength0 = sizeof(dataset0)/sizeof(*dataset0);
 int datalength1 = sizeof(dataset1)/sizeof(*dataset1);
+int datalength2 = sizeof(dataset2)/sizeof(*dataset2);
 
 int datalength[] = {
   datalength0,
-  datalength1
+  datalength1,
+  datalength2
 };
 
 // // calculate length of array (sigh, C++)
@@ -216,33 +225,49 @@ void loop()
     //Serial.println(reqMaster);
     // did we receive a HANDSHAKE request?
     if (findText(reqHandshake, reqMaster) >= 0) {
-      Serial.println(reqHandshake);
-      activated = false;
+      Serial.println(rspHandshake);
     }
     // did we receive an ID request?
     else if (findText(reqId, reqMaster) >= 0) {
       //Serial.print("We sent: ");
       Serial.println(rspId);
     }
-    // did we receive a START request?
-    else if (findText(reqStart, reqMaster) >= 0) {
-      Serial.println(reqStart + "-" + rspAck);
-      activated = true;
+    // did we receive a STATUS request?
+    else if (findText(reqStatus, reqMaster) >= 0) {
+      if (activated) {
+        Serial.println(reqStatus + "-" + reqStart);
+      } 
+      else {
+        Serial.println(reqStatus + "-" + reqStop);
+      }
     }
-    // did we receive a STOP request?
-    else if (findText(reqStop, reqMaster) >= 0) {
-      Serial.println(reqStop + "-" + rspAck);
-      activated = false;
-    }
+    // // did we receive a START request?
+    // else if (findText(reqStart, reqMaster) >= 0) {
+    //   Serial.println(reqStart + "-" + rspAck);
+    //   activated = true;
+    // }
+    // // did we receive a STOP request?
+    // else if (findText(reqStop, reqMaster) >= 0) {
+    //   Serial.println(reqStop + "-" + rspAck);
+    //   activated = false;
+    // }
   }
-  if (activated) {
+  if (activated || IDLESWEEP) {
+    int newAmp;
+    Serial.println("Working...");
+    delay(100);
     // for each attached pen, we update it once per cycle
     for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
       //penStatus(penNo);
       // if we are not in the middle of a wave...
       if (! penMoving[penNo]){
         // ... get a new wave from the dataset
-        int newAmp = dataset[penNo][datasetPos[penNo]];
+        if (IDLESWEEP) {
+          int newAmp = dataset[0][datasetPos[penNo]];
+        }
+        else {
+          int newAmp = dataset[penNo+1][datasetPos[penNo]];
+        }
         // Serial.print("Dataset Pos: ");
         // Serial.print(datasetPos[penNo]);
         // Serial.print(", New Amp: ");
