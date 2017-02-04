@@ -129,6 +129,8 @@ def request_id_from_device(port):
                 break
             sleep(retry_delay)
         return response
+    # otherwise return empty string
+    return ""
 
 def setup_serial():
     """Set up all of our serial ports connected to our devices"""
