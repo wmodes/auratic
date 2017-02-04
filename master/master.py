@@ -53,13 +53,13 @@ devices = {'rfid': {'name':     'RFID Reader',
                     'status':   'init',
                     'port':     ''
                     }, 
-          'chart1': {'name':     'Chart Recorder',
+          'chart1': {'name':    'Chart Recorder',
                     'id':       'id:chart',
                     'fault':    'warn',
                     'status':   'init',
                     'port':     ''
                     },
-          'chart2': {'name':     'Chart Recorder',
+          'chart2': {'name':    'Chart Recorder 2',
                     'id':       'id:chart',
                     'fault':    'silent',
                     'status':   'init',
@@ -89,7 +89,8 @@ chart_timer = ""
 #
 
 def is_port_active(port):
-    """Check if given port is active"""
+    """Check if given port is active. 
+    Note if no part is passed, it returns False"""
     if (port):
         #print "Checking if %s is active:" % (port)
         # we use a system call to see if this serial handle exists
@@ -105,7 +106,7 @@ def get_active_usb_ports():
             usb_list.append(usb_port)
     return usb_list
 
-def request_id(port):
+def request_id_from_device(port):
     """Send an ID request to a serial port and return the ID we get"""
     # we only want to check port if it is still active
     if (is_port_active(port)):
@@ -129,37 +130,51 @@ def request_id(port):
 def setup_serial():
     """Set up all of our serial ports connected to our devices"""
     #print "Checking for active ports"
-    usb_ports = get_active_usb_ports()
-    # pause a moment to make sure system has set up the serial ports we've found
-    sleep(1)
-    if not usb_ports:
-        report_at_intervals("ERROR: No active devices found")
-    for port in usb_ports:
-        response = request_id(port)
-        #
-        # look through our list of expected devices
-        for device in devices:
-            # we only look at devices that are not already live
-            if (devices[device]['status'] != 'live'):
-                # if device IDs as this device
-                if (devices[device]['id'] in response):
-                    print "Setting up: '%s' ID: '%s' Device: '%s'" % (port, 
-                            response, devices[device]['name'])
-                    # asign a serial handle
-                    devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
-                    # assign the port name
-                    devices[device]['port'] = port
-                    # add port to our assigned port list
-                    if port not in assigned_ports:
-                        assigned_ports.append(port) 
-                    # mark is as currently live
-                    devices[device]['status'] = 'live'
-                    # we don't need to look through the rest
-                    break
+    try:
+        usb_ports = get_active_usb_ports()
+        # pause a moment to make sure system has set up the serial ports we've found
+        sleep(1)        # needed?
+        if not usb_ports:
+            report_at_intervals("ERROR: No active devices found")
+        for port in usb_ports:
+            # if this port isn't already assigned
+            if (port not in assigned_ports):
+                #
+                # look through our list of expected devices
+                for device in devices:
+                    # if the device is not already live and
+                    if (devices[device]['status'] != 'live'):
+                        # if device IDs as this device
+                        response = request_id_from_device(port)
+                        if (devices[device]['id'] in response):
+                            print "Setting up: '%s' ID: '%s' Device: '%s'" % (port, 
+                                    response, devices[device]['name'])
+                            # asign a serial handle
+                            devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
+                            # assign the port name
+                            devices[device]['port'] = port
+                            # add port to our assigned port list
+                            if port not in assigned_ports:
+                                assigned_ports.append(port) 
+                            # mark is as currently live
+                            devices[device]['status'] = 'live'
+                            # we don't need to look through the rest of the devices
+                            break
+            # we continue looking through the active ports
+    except IOError:
+        print "WARNING: Setup error, retrying"
+        setup_serial()
 
-def check_if_all_devices_live():
-    device_missing = False
+def all_devices_live():
+    """Check if each device handle is still valid.
+    Note that a fault with some critical devices will pause 
+    any further action, while others just generate a warning. 
+    Still other devices are optional and will just silently fail."""
+    devices_ok = True
+    # we iterate over the list of possible devices
     for device in devices:
+        # check if port is active. Note if we lost the port previously and it is empty
+        # is_port_active() returns False
         if not is_port_active(devices[device]['port']):
             #devices['chart']['live'] = False
             if (devices[device]['fault'] == "critical"):
@@ -168,15 +183,24 @@ def check_if_all_devices_live():
             elif (devices[device]['fault'] == "warn"):
                 # at intervals we report this
                 report_at_intervals("WARNING: No %s found." % devices[device]['name'])
-            # set a new status for this device
+            # set status for this device
             devices[device]['status'] == 'missing'
+            # unassign port
+            devices[device]['port'] == ''
             # remove port from our assigned port list
             if port in assigned_ports:
                 assigned_ports.remove(devices[device]['port']) 
-            device_missing = True
-    if (device_missing):
-        return False
-    return True
+            devices_ok = False
+    return devices_ok
+
+def all_critical_devices_live():
+    """Quick check if critical devices are live relies on side effects of check_if_all_devices_live()"""
+    critical_ok = True
+    for device in devices:
+        if device['fault'] == 'critical' and device['status'] != 'live':
+            critical_ok = False
+            break
+    return critical_ok
 
 #
 # device communication
@@ -241,52 +265,56 @@ def trigger_actions(data):
     duration = data["duration"]
     start_chart(duration)
 
+def do_the_things():
+    """Do our main loop actions, particularly listening to the
+    RFID reader and triggering actions"""
+    try:
+        report_at_intervals("Listening for RFID")
+        rfid_device = devices['rfid']['handle']
+        # do we have data on the input buffer waiting
+        if rfid_device.in_waiting > 0:
+            # if we send the same rfid multiple times
+            #   in theory they should all be the same,
+            #   but in practice we are sometimes missing bytes.
+            #   Thus we send it multiple times to guard against data loss
+            rfid_good = ""
+            count = 0
+            # we keep looking if we have something waiting
+            #   AND we haven't exceeded our count
+            #   AND we haven't already rec'd a good rfid
+            while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
+                   not rfid_good):
+                rfid_in = rfid_device.readline().strip()
+                # if the rfid has the proper length,
+                # we can trust it
+                if len(rfid_in) == rfid_length:
+                    rfid_good = rfid_in
+                    print "    Received good RFID:", rfid_in
+                    break
+                else:
+                    print "    Received bad RFID:", rfid_in
+            if rfid_good:
+                print "RFID found:", rfid_good
+                data = get_rfid_data(rfid_good)
+                display_found_object(data)
+                trigger_actions(data)
+            # clear incoming buffer in case we have stuff waiting
+            rfid_device.reset_input_buffer()
+            print "Continue listening for RFID"
+    except IOError:
+        print "WARNING: Lost RFID device"
+
 def main():
     setup_serial()
     # This is our main loop that listens and responds
     while 1 :
         # check if all of our devices are active
-        all_live = check_if_all_devices_live()
-        if (not all_live):
+        if not all_devices_live():
             setup_serial()
-        # we can proceed as long as the rfid device is active
-        if (devices['rfid']['status'] == 'live'):
-            try:
-                report_at_intervals("Listening for RFID")
-                rfid_device = devices['rfid']['handle']
-                # do we have data on the input buffer waiting
-                if rfid_device.in_waiting > 0:
-                    # if we send the same rfid multiple times
-                    #   in theory they should all be the same,
-                    #   but in practice we are sometimes missing bytes.
-                    #   Thus we send it multiple times to guard against data loss
-                    rfid_good = ""
-                    count = 0
-                    # we keep looking if we have something waiting
-                    #   AND we haven't exceeded our count
-                    #   AND we haven't already rec'd a good rfid
-                    while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
-                           not rfid_good):
-                        rfid_in = rfid_device.readline().strip()
-                        # if the rfid has the proper length,
-                        # we can trust it
-                        if len(rfid_in) == rfid_length:
-                            rfid_good = rfid_in
-                            print "    Received good RFID:", rfid_in
-                            break
-                        else:
-                            print "    Received bad RFID:", rfid_in
-                    if rfid_good:
-                        print "RFID found:", rfid_good
-                        data = get_rfid_data(rfid_good)
-                        display_found_object(data)
-                        trigger_actions(data)
-                    # clear incoming buffer in case we have stuff waiting
-                    rfid_device.reset_input_buffer()
-                    print "Continue listening for RFID"
-            except IOError:
-                print "Lost RFID device"
-                continue
+        # let's take actions if we can
+        if all_critical_devices_live():
+            do_the_things()
+
 
 if __name__=='__main__':
     # try:     
