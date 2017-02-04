@@ -245,6 +245,7 @@ def get_rfid_data(rfid):
 def debug(text, level):
     if (DEBUG >= level):
         print text
+    sleep(0.25)
 
 def report_at_intervals(text):
     # if now is greater than our last report time + an interval
