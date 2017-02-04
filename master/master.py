@@ -49,15 +49,25 @@ report_interval = 5
 # serial device handles
 devices = {'rfid': {'name':     'RFID Reader',
                     'id':       'id:rfid',
+                    'fault':    'critical',
                     'status':   'init',
                     'port':     ''
                     }, 
-          'chart': {'name':     'Chart Recorder',
+          'chart1': {'name':     'Chart Recorder',
                     'id':       'id:chart',
+                    'fault':    'warn',
+                    'status':   'init',
+                    'port':     ''
+                    },
+          'chart2': {'name':     'Chart Recorder',
+                    'id':       'id:chart',
+                    'fault':    'silent',
                     'status':   'init',
                     'port':     ''
                     }
            }
+
+assigned_ports = []
 
 # timers
 chart_timer = ""
@@ -139,6 +149,9 @@ def setup_serial():
                     devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
                     # assign the port name
                     devices[device]['port'] = port
+                    # add port to our assigned port list
+                    if port not in assigned_ports:
+                        assigned_ports.append(port) 
                     # mark is as currently live
                     devices[device]['status'] = 'live'
                     # we don't need to look through the rest
@@ -149,9 +162,17 @@ def check_if_all_devices_live():
     for device in devices:
         if not is_port_active(devices[device]['port']):
             #devices['chart']['live'] = False
-            # every 10 seconds, we report this
-            report_at_intervals("WARNING: No %s found." % devices[device]['name'])
+            if (devices[device]['fault'] == "critical"):
+                # at intervals we report this
+                report_at_intervals("CRITICAL: No %s found." % devices[device]['name'])
+            elif (devices[device]['fault'] == "warn"):
+                # at intervals we report this
+                report_at_intervals("WARNING: No %s found." % devices[device]['name'])
+            # set a new status for this device
             devices[device]['status'] == 'missing'
+            # remove port from our assigned port list
+            if port in assigned_ports:
+                assigned_ports.remove(devices[device]['port']) 
             device_missing = True
     if (device_missing):
         return False
