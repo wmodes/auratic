@@ -51,19 +51,22 @@ devices = {'rfid': {'name':     'RFID Reader',
                     'id':       'id:rfid',
                     'fault':    'critical',
                     'status':   'init',
-                    'port':     ''
+                    'port':     '',
+                    'sort':     1
                     }, 
           'chart1': {'name':    'Chart Recorder',
                     'id':       'id:chart',
                     'fault':    'warn',
                     'status':   'init',
-                    'port':     ''
+                    'port':     '',
+                    'sort':     2
                     },
           'chart2': {'name':    'Chart Recorder 2',
                     'id':       'id:chart',
                     'fault':    'silent',
                     'status':   'init',
-                    'port':     ''
+                    'port':     '',
+                    'sort':     3
                     }
            }
 
@@ -141,23 +144,23 @@ def setup_serial():
             if (port not in assigned_ports):
                 #
                 # look through our list of expected devices
-                for device in devices:
+                for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
                     # if the device is not already live and
-                    if (devices[device]['status'] != 'live'):
+                    if (device['status'] != 'live'):
                         # if device IDs as this device
                         response = request_id_from_device(port)
-                        if (devices[device]['id'] in response):
+                        if (device['id'] in response):
                             print "Setting up: '%s' ID: '%s' Device: '%s'" % (port, 
-                                    response, devices[device]['name'])
+                                    response, device['name'])
                             # asign a serial handle
-                            devices[device]['handle'] = serial.Serial(port, 9600, timeout=.5)
+                            device['handle'] = serial.Serial(port, 9600, timeout=.5)
                             # assign the port name
-                            devices[device]['port'] = port
+                            device['port'] = port
                             # add port to our assigned port list
                             if port not in assigned_ports:
                                 assigned_ports.append(port) 
                             # mark is as currently live
-                            devices[device]['status'] = 'live'
+                            device['status'] = 'live'
                             # we don't need to look through the rest of the devices
                             break
             # we continue looking through the active ports
@@ -172,31 +175,31 @@ def all_devices_live():
     Still other devices are optional and will just silently fail."""
     devices_ok = True
     # we iterate over the list of possible devices
-    for device in devices:
+    for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
         # check if port is active. Note if we lost the port previously and it is empty
         # is_port_active() returns False
-        if not is_port_active(devices[device]['port']):
+        if not is_port_active(device['port']):
             #devices['chart']['live'] = False
-            if (devices[device]['fault'] == "critical"):
+            if (device['fault'] == "critical"):
                 # at intervals we report this
-                report_at_intervals("CRITICAL: No %s found." % devices[device]['name'])
-            elif (devices[device]['fault'] == "warn"):
+                report_at_intervals("CRITICAL: No %s found." % device['name'])
+            elif (device['fault'] == "warn"):
                 # at intervals we report this
-                report_at_intervals("WARNING: No %s found." % devices[device]['name'])
+                report_at_intervals("WARNING: No %s found." % device['name'])
             # set status for this device
-            devices[device]['status'] == 'missing'
+            device['status'] == 'missing'
             # unassign port
-            devices[device]['port'] == ''
+            device['port'] == ''
             # remove port from our assigned port list
             if port in assigned_ports:
-                assigned_ports.remove(devices[device]['port']) 
+                assigned_ports.remove(device['port']) 
             devices_ok = False
     return devices_ok
 
 def all_critical_devices_live():
     """Quick check if critical devices are live relies on side effects of check_if_all_devices_live()"""
     critical_ok = True
-    for device in devices:
+    for device in sorted(devices.items(), key=lambda x: x[1]['sort']):
         if device['fault'] == 'critical' and device['status'] != 'live':
             critical_ok = False
             break
