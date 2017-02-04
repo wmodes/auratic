@@ -242,7 +242,7 @@ def get_rfid_data(rfid):
 #
 
 def debug(text, level):
-    if (DEBUG > level):
+    if (DEBUG >= level):
         print text
 
 def report_at_intervals(text):
