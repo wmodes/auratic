@@ -191,7 +191,7 @@ def all_devices_live():
             # unassign port
             device['port'] == ''
             # remove port from our assigned port list
-            if port in assigned_ports:
+            if device['port'] in assigned_ports:
                 assigned_ports.remove(device['port']) 
             devices_ok = False
     return devices_ok
