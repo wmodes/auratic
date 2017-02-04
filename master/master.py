@@ -147,7 +147,7 @@ def setup_serial():
         # pause a moment to make sure system has set up the serial ports we've found
         # sleep(1)        # needed?
         if not usb_ports:
-            report_at_intervals("ERROR: No active devices found")
+            report("ERROR: No active devices found")
         for port in usb_ports:
             debug("setup_serial(): Active ports: " + str(usb_ports), 1)
             debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
@@ -197,10 +197,10 @@ def all_devices_live():
             #devices['chart']['live'] = False
             if (device['fault'] == "critical"):
                 # at intervals we report this
-                report_at_intervals("CRITICAL: %s disconnected." % device['name'])
+                report("CRITICAL: %s disconnected." % device['name'])
             elif (device['fault'] == "warn"):
                 # at intervals we report this
-                report_at_intervals("WARNING: %s disconnected." % device['name'])
+                report("WARNING: %s disconnected." % device['name'])
             # set status for this device
             device['status'] == 'missing'
             # unassign port
@@ -252,10 +252,10 @@ def debug(text, level):
         # if now is greater than our last debug time + an interval
         if (text not in last_debug_time or
                 time() > last_debug_time[text] + debug_interval):
-            print text
+            print "DEBUG: " + text
             last_debug_time[text] = time()
 
-def report_at_intervals(text):
+def report(text):
     # if now is greater than our last report time + an interval
     if (text not in last_report_time or
             time() > last_report_time[text] + report_interval):
@@ -295,7 +295,7 @@ def do_the_things():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
     try:
-        report_at_intervals("Listening for RFID")
+        report("Listening for RFID")
         rfid_device = devices['rfid']['handle']
         # do we have data on the input buffer waiting
         if rfid_device.in_waiting > 0:
@@ -328,7 +328,7 @@ def do_the_things():
             rfid_device.reset_input_buffer()
             print "Continue listening for RFID"
     except IOError:
-        print "WARNING: Lost RFID device"
+        report("WARNING: Lost RFID device")
 
 def main():
     setup_serial()
