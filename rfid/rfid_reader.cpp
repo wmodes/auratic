@@ -15,19 +15,12 @@ int rfidCount = 3;
 
 String reqId = "id";
 String rspId = "id:rfid";
-String reqHandshake = "hello?"
-String rspHandshake = "hello!"
+String reqStatus = "status";
+String rspAck = "OK";
+String reqHandshake = "hello?";
+String rspHandshake = "hello!";
 
-void setup()
-{
-    RFID.begin(9600);    // start serial to RFID reader
-    RFID.setTimeout(500);  // we'll wait a half sec
-    Serial.begin(9600);  // start serial to PC 
-    Serial.setTimeout(500);  // we'll wait a half sec
-    pinMode(led, OUTPUT);
-}
-
-void loop()
+void checkForRequests()
 {
   // do we have a request from the master?
   if (Serial.available() > 0) 
@@ -39,8 +32,7 @@ void loop()
     //
     // did we receive a HANDSHAKE request?
     if (reqMaster.indexOf(reqHandshake) >= 0) {
-      Serial.println(reqHandshake);
-      activated = false;
+      Serial.println(rspHandshake);
     }
     // did we receive an ID request?
     else if (reqMaster.indexOf(reqId) >= 0) {
@@ -49,8 +41,16 @@ void loop()
     }
     // did we receive a STATUS request?
     else if (reqMaster.indexOf(reqStatus) >= 0) {
-      Serial.println(reqStatus + ":" + reqHandshake);
+      Serial.println(reqStatus + ":" + rspAck);
+    }
+    else {
+      Serial.println("Unknown-request:" + reqMaster);
+    }    
   }
+}
+
+void doTheThings()
+{
   // do we have a digit waiting?
   if (RFID.available() > 0) 
   {
@@ -85,4 +85,19 @@ void loop()
     digitalWrite(led, LOW);
     delay(250);
   }
+}
+
+void setup()
+{
+    RFID.begin(9600);    // start serial to RFID reader
+    RFID.setTimeout(500);  // we'll wait a half sec
+    Serial.begin(9600);  // start serial to PC 
+    Serial.setTimeout(500);  // we'll wait a half sec
+    pinMode(led, OUTPUT);
+}
+
+void loop()
+{
+  checkForRequests();
+  doTheThings();
 }
