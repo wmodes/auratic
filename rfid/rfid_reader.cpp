@@ -27,16 +27,6 @@ void setup()
     pinMode(led, OUTPUT);
 }
 
-int findText(String needle, String haystack) {
-  int foundpos = -1;
-  for (int i = 0; i <= haystack.length() - needle.length(); i++) {
-    if (haystack.substring(i,needle.length()+i) == needle) {
-      foundpos = i;
-    }
-  }
-  return foundpos;
-}
-
 void loop()
 {
   // do we have a request from the master?
@@ -48,15 +38,18 @@ void loop()
     //Serial.println(reqMaster);
     //
     // did we receive a HANDSHAKE request?
-    if (findText(reqHandshake, master_req) >= 0) {
+    if (reqMaster.indexOf(reqHandshake) >= 0) {
       Serial.println(reqHandshake);
       activated = false;
     }
     // did we receive an ID request?
-    else if (findText(reqId, reqMaster) >= 0) {
+    else if (reqMaster.indexOf(reqId) >= 0) {
       //Serial.print("We sent: ");
       Serial.println(rspId);
     }
+    // did we receive a STATUS request?
+    else if (reqMaster.indexOf(reqStatus) >= 0) {
+      Serial.println(reqStatus + ":" + reqHandshake);
   }
   // do we have a digit waiting?
   if (RFID.available() > 0) 
