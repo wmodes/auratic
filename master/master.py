@@ -54,21 +54,24 @@ last_debug_time = {}
 debug_interval = 1
 
 # serial device handles
-devices = {'rfid': {'name':     'RFID Reader',
+devices = {'rfid': {'key':      'rfid',
+                    'name':     'RFID Reader',
                     'id':       'id:rfid',
                     'fault':    'critical',
                     'status':   'init',
                     'port':     '',
                     'sort':     1
                     },
-           'chart1': {'name':    'Chart Recorder 1',
+           'chart1': {'key':     'chart1',
+                      'name':    'Chart Recorder 1',
                       'id':       'id:chart',
                       'fault':    'warn',
                       'status':   'init',
                       'port':     '',
                       'sort':     2
                       },
-           'chart2': {'name':    'Chart Recorder 2',
+           'chart2': {'key':      'chart2',
+                      'name':     'Chart Recorder 2',
                       'id':       'id:chart',
                       'fault':    'silent',
                       'status':   'init',
@@ -98,6 +101,9 @@ chart_timer = ""
 # Device locating and setup
 #
 
+def sorted_devices():
+    """Return list of devices sorted by sort order values in devices dictionary"""
+    return sorted(devices.values(), key=lambda x: x['sort'])
 
 def is_port_active(port):
     """Check if given port is active.
@@ -161,7 +167,7 @@ def setup_serial():
                 debug("setup_serial(): Unassigned port: " + port, 1)
                 #
                 # look through our list of expected devices
-                for device in sorted(devices.values(), key=lambda x: x['sort']):
+                for device in sorted_devices():
                     # if the device is not already live and
                     if (not is_port_active(device['port'])):
                         debug(
@@ -199,7 +205,7 @@ def all_devices_live():
     Still other devices are optional and will just silently fail."""
     devices_ok = True
     # we iterate over the list of possible devices
-    for device in sorted(devices.values(), key=lambda x: x['sort']):
+    for device in sorted_devices():
         # check if port is active. Note if we lost the port previously and it is empty
         # is_port_active() returns False
         if not is_port_active(device['port']):
@@ -224,7 +230,7 @@ def all_devices_live():
 def all_critical_devices_live():
     """Quick check if critical devices are live relies on side effects of check_if_all_devices_live()"""
     critical_ok = True
-    for device in sorted(devices.values(), key=lambda x: x['sort']):
+    for device in sorted_devices():
         if device['fault'] == 'critical' and device['status'] != 'live':
             critical_ok = False
             break
@@ -297,21 +303,26 @@ def display_found_object(data):
 
 
 def start_chart(time):
-    """Start the chart recorder and set callback timer to turn it off"""
+    """Start chart recorders and set callback timer to turn it off"""
     global chart_timer
     # first we cancel any timer we've set before
     if (chart_timer):
         chart_timer.cancel()
         report("Canceling old timer")
-    results = tell_device('chart', req_start)
-    report("Start chart recorder sez:", results)
+    # tell every connected chart recorder to start
+    for device in sorted_devices():
+        if 'chart' in device['key'] and is_port_active(device['port']):
+            results = tell_device(device['key'], req_start)
+            report("Starting %s. It responds: %s" % (device['name'], results))
     chart_timer = threading.Timer(time, stop_chart).start()
 
 
 def stop_chart():
-    """Stops the chart recorder"""
-    results = tell_device('chart', req_stop)
-    report("Stop chart recorder sez:", results)
+    """Stops chart recorders"""
+    for device in sorted_devices():
+        if 'chart' in device['key'] and is_port_active(device['port']):
+            results = tell_device('chart', req_stop)
+            report("Stopping %s. It responds: %s" % (device['name'], results))
 
 
 def trigger_actions(data):
