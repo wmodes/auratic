@@ -30,7 +30,7 @@ serial_timeout = 0.5
 req_id = "id"
 req_start = "start"
 req_stop = "stop"
-rsp_ack = "ack"
+rsp_ack = "OK"
 req_handshake = "hello?"
 rsp_handshake = "hello!"
 
