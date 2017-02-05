@@ -28,7 +28,7 @@ const int PENSINUSE = 2;    // how many pens are we actually using
 String reqId = "id";
 String rspId = "id:chart";
 String reqStatus = "status";
-String reqStart = "start";
+String reqStart = "go";
 String reqStop = "stop";
 String rspAck = "OK";
 String reqHandshake = "hello?";
@@ -192,18 +192,6 @@ void moveAll()
   delay(GLOBAL_WAIT);
 }
 
-
-void setup() 
-{
-  Serial.begin(9600);      // open the serial port at 9600 bps:
-  //Serial.println("\n\n\n");
-  for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
-    penSetup(penNo);
-    datasetPos[penNo] = 0;
-  }
-  delay(2000);
-}
-
 int findText(String needle, String haystack) {
   int foundpos = -1;
   for (int i = 0; i <= haystack.length() - needle.length(); i++) {
@@ -212,6 +200,18 @@ int findText(String needle, String haystack) {
     }
   }
   return foundpos;
+}
+
+void setup() 
+{
+  Serial.begin(9600);      // open the serial port at 9600 bps:
+  Serial.setTimeout(100);
+  //Serial.println("\n\n\n");
+  for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
+    penSetup(penNo);
+    datasetPos[penNo] = 0;
+  }
+  delay(2000);
 }
 
 void loop() 
@@ -235,56 +235,59 @@ void loop()
     // did we receive a STATUS request?
     else if (findText(reqStatus, reqMaster) >= 0) {
       if (activated) {
-        Serial.println(reqStatus + "-" + reqStart);
+        Serial.println(reqStatus + ":" + reqStart);
       } 
       else {
-        Serial.println(reqStatus + "-" + reqStop);
+        Serial.println(reqStatus + ":" + reqStop);
       }
     }
-    // // did we receive a START request?
-    // else if (findText(reqStart, reqMaster) >= 0) {
-    //   Serial.println(reqStart + "-" + rspAck);
-    //   activated = true;
-    // }
-    // // did we receive a STOP request?
-    // else if (findText(reqStop, reqMaster) >= 0) {
-    //   Serial.println(reqStop + "-" + rspAck);
-    //   activated = false;
-    // }
-  }
-  if (activated || IDLESWEEP) {
-    int newAmp;
-    Serial.println("Working...");
-    delay(100);
-    // for each attached pen, we update it once per cycle
-    for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
-      //penStatus(penNo);
-      // if we are not in the middle of a wave...
-      if (! penMoving[penNo]){
-        // ... get a new wave from the dataset
-        if (IDLESWEEP) {
-          int newAmp = dataset[0][datasetPos[penNo]];
-        }
-        else {
-          int newAmp = dataset[penNo+1][datasetPos[penNo]];
-        }
-        // Serial.print("Dataset Pos: ");
-        // Serial.print(datasetPos[penNo]);
-        // Serial.print(", New Amp: ");
-        // Serial.println(newAmp);
-        penStart(penNo, newAmp);
-        datasetPos[penNo]++;
-        // check to see if we've run out of data
-        if (datasetPos[penNo] >= datalength[penNo]) {
-          datasetPos[penNo] = 0;
-        }
-        //penStatus(penNo);
-      }
-      else {
-        penMove(penNo);
-      }
+    // did we receive a START request?
+    else if (findText(reqStart, reqMaster) >= 0) {
+      Serial.println(reqStart + ":" + rspAck);
+      activated = true;
     }
-    delay(GLOBAL_WAIT);
+    // did we receive a STOP request?
+    else if (findText(reqStop, reqMaster) >= 0) {
+      Serial.println(reqStop + ":" + rspAck);
+      activated = false;
+    }
+    else {
+      Serial.println("Unknown-request:" + reqMaster);
+    }
   }
+  // if (activated || IDLESWEEP) {
+  //   int newAmp;
+  //   Serial.println("Working...");
+  //   delay(100);
+  //   // for each attached pen, we update it once per cycle
+  //   for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
+  //     //penStatus(penNo);
+  //     // if we are not in the middle of a wave...
+  //     if (! penMoving[penNo]){
+  //       // ... get a new wave from the dataset
+  //       if (IDLESWEEP) {
+  //         int newAmp = dataset[0][datasetPos[penNo]];
+  //       }
+  //       else {
+  //         int newAmp = dataset[penNo+1][datasetPos[penNo]];
+  //       }
+  //       // Serial.print("Dataset Pos: ");
+  //       // Serial.print(datasetPos[penNo]);
+  //       // Serial.print(", New Amp: ");
+  //       // Serial.println(newAmp);
+  //       penStart(penNo, newAmp);
+  //       datasetPos[penNo]++;
+  //       // check to see if we've run out of data
+  //       if (datasetPos[penNo] >= datalength[penNo]) {
+  //         datasetPos[penNo] = 0;
+  //       }
+  //       //penStatus(penNo);
+  //     }
+  //     else {
+  //       penMove(penNo);
+  //     }
+  //   }
+  //   delay(GLOBAL_WAIT);
+  // }
 }
 
