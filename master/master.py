@@ -321,7 +321,7 @@ def stop_chart():
     """Stops chart recorders"""
     for device in sorted_devices():
         if 'chart' in device['key'] and is_port_active(device['port']):
-            results = tell_device('chart', req_stop)
+            results = tell_device(device['key'], req_stop)
             report("Stopping %s. It responds: %s" % (device['name'], results))
 
 
