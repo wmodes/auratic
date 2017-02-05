@@ -75,6 +75,7 @@ void doTheThings()
       if (RFID.available() == 0) {
         break;
       }
+      delay(10);
     }
     // We send three times to guard against serial data loss
     for(int i = 0; i < rfidCount; i++) {
