@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 """master.py: listen for RFID from active USB port and trigger chart recorder and video"""
-__author__      = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
-__copyright__   = "2017, MIT"
+__author__ = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
+__copyright__ = "2017, MIT"
 
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
@@ -18,7 +18,7 @@ import threading
 # Constants
 #
 DEBUG = 0
-usb_port_prefix="/dev/ttyUSB"
+usb_port_prefix = "/dev/ttyUSB"
 max_usb_ports = 12
 rfid_send_count = 3
 rfid_length = 43
@@ -31,8 +31,8 @@ req_id = "id"
 req_start = "start"
 req_stop = "stop"
 rsp_ack = "ack"
-req_handshake =  "hello?"
-rsp_handshake =  "hello!"
+req_handshake = "hello?"
+rsp_handshake = "hello!"
 
 # id's
 id_rfid = "id:rfid"
@@ -60,21 +60,21 @@ devices = {'rfid': {'name':     'RFID Reader',
                     'status':   'init',
                     'port':     '',
                     'sort':     1
-                    }, 
-          'chart1': {'name':    'Chart Recorder 1',
-                    'id':       'id:chart',
-                    'fault':    'warn',
-                    'status':   'init',
-                    'port':     '',
-                    'sort':     2
                     },
-          'chart2': {'name':    'Chart Recorder 2',
-                    'id':       'id:chart',
-                    'fault':    'silent',
-                    'status':   'init',
-                    'port':     '',
-                    'sort':     3
-                    }
+           'chart1': {'name':    'Chart Recorder 1',
+                      'id':       'id:chart',
+                      'fault':    'warn',
+                      'status':   'init',
+                      'port':     '',
+                      'sort':     2
+                      },
+           'chart2': {'name':    'Chart Recorder 2',
+                      'id':       'id:chart',
+                      'fault':    'silent',
+                      'status':   'init',
+                      'port':     '',
+                      'sort':     3
+                      }
            }
 
 assigned_ports = []
@@ -98,13 +98,15 @@ chart_timer = ""
 # Device locating and setup
 #
 
+
 def is_port_active(port):
-    """Check if given port is active. 
+    """Check if given port is active.
     Note if no part is passed, it returns False"""
     if (port):
-        #report("Checking if %s is active:" % (port))
+        # report("Checking if %s is active:" % (port))
         # we use a system call to see if this serial handle exists
         return os.path.exists(port)
+
 
 def get_active_usb_ports():
     """Search usb ports and find out which ones are active, returning a list"""
@@ -115,6 +117,7 @@ def get_active_usb_ports():
         if is_port_active(usb_port):
             usb_list.append(usb_port)
     return usb_list
+
 
 def request_id_from_device(port):
     """Send an ID request to a serial port and return the ID we get"""
@@ -139,9 +142,10 @@ def request_id_from_device(port):
     # otherwise return empty string
     return ""
 
+
 def setup_serial():
     """Set up all of our serial ports connected to our devices"""
-    #report("Checking for active ports")
+    # report("Checking for active ports")
     try:
         usb_ports = get_active_usb_ports()
         # pause a moment to make sure system has set up the serial ports we've found
@@ -150,7 +154,8 @@ def setup_serial():
             update("ERROR: No active devices found")
         for port in usb_ports:
             debug("setup_serial(): Active ports: " + str(usb_ports), 1)
-            debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
+            debug(
+                "setup_serial(): Registered ports: " + str(assigned_ports), 1)
             # if this port isn't already assigned
             if (port not in assigned_ports):
                 debug("setup_serial(): Unassigned port: " + port, 1)
@@ -159,23 +164,26 @@ def setup_serial():
                 for device in sorted(devices.values(), key=lambda x: x['sort']):
                     # if the device is not already live and
                     if (not is_port_active(device['port'])):
-                        debug("setup_serial(): Unassigned device: " + device['name'], 1)
+                        debug(
+                            "setup_serial(): Unassigned device: " + device['name'], 1)
                         # if device IDs as this device
                         response = request_id_from_device(port)
                         debug("setup_serial(): Response: " + response, 1)
                         if (device['id'] in response):
-                            report("Setting up %s, ID: %s, Port: %s" % (device['name'], 
-                                    response, port))
+                            report("Setting up %s, ID: %s, Port: %s" % (device['name'],
+                                                                        response, port))
                             # asign a serial handle
-                            device['handle'] = serial.Serial(port, 9600, timeout=.5)
+                            device['handle'] = serial.Serial(
+                                port, 9600, timeout=.5)
                             # assign the port name
                             device['port'] = port
                             # add port to our assigned port list
                             if port not in assigned_ports:
-                                assigned_ports.append(port) 
+                                assigned_ports.append(port)
                             # mark is as currently live
                             device['status'] = 'live'
-                            # we don't need to look through the rest of the devices
+                            # we don't need to look through the rest of the
+                            # devices
                             break
             # we continue looking through the active ports
     except IOError:
@@ -183,10 +191,11 @@ def setup_serial():
         sleep(1)
         setup_serial()
 
+
 def all_devices_live():
     """Check if each device handle is still valid.
-    Note that a fault with some critical devices will pause 
-    any further action, while others just generate a warning. 
+    Note that a fault with some critical devices will pause
+    any further action, while others just generate a warning.
     Still other devices are optional and will just silently fail."""
     devices_ok = True
     # we iterate over the list of possible devices
@@ -194,7 +203,7 @@ def all_devices_live():
         # check if port is active. Note if we lost the port previously and it is empty
         # is_port_active() returns False
         if not is_port_active(device['port']):
-            #devices['chart']['live'] = False
+            # devices['chart']['live'] = False
             if (device['fault'] == "critical"):
                 # at intervals we report this
                 update("CRITICAL: %s disconnected." % device['name'])
@@ -207,9 +216,10 @@ def all_devices_live():
             device['port'] == ''
             # remove port from our assigned port list
             if device['port'] in assigned_ports:
-                assigned_ports.remove(device['port']) 
+                assigned_ports.remove(device['port'])
             devices_ok = False
     return devices_ok
+
 
 def all_critical_devices_live():
     """Quick check if critical devices are live relies on side effects of check_if_all_devices_live()"""
@@ -223,6 +233,7 @@ def all_critical_devices_live():
 #
 # device communication
 #
+
 
 def tell_device(device, text):
     ser = devices[device]['handle']
@@ -238,6 +249,7 @@ def tell_device(device, text):
             return response
         sleep(retry_delay)
 
+
 def get_rfid_data(rfid):
     if rfid not in object_db:
         rfid = "default"
@@ -247,11 +259,13 @@ def get_rfid_data(rfid):
 # Outside world actions & communication
 #
 
+
 def report(*args):
     """immediately report information.
     Note: Accepts multiple arguments"""
     text = " ".join(list(map(str, args)))
     print text
+
 
 def debug(text, level):
     if (DEBUG >= level):
@@ -260,6 +274,7 @@ def debug(text, level):
                 time() > last_debug_time[text] + debug_interval):
             report("DEBUG: " + text)
             last_debug_time[text] = time()
+
 
 def update(*args):
     """periodically report information at report_interval seconds.
@@ -271,6 +286,7 @@ def update(*args):
         report(text)
         last_report_time[text] = time()
 
+
 def display_found_object(data):
     title = data["title"]
     category = data["category"]
@@ -278,6 +294,7 @@ def display_found_object(data):
     report("This is a", title)
     report("Showing video", url)
     # browser.get(url)
+
 
 def start_chart(time):
     """Start the chart recorder and set callback timer to turn it off"""
@@ -290,15 +307,18 @@ def start_chart(time):
     report("Start chart recorder sez:", results)
     chart_timer = threading.Timer(time, stop_chart).start()
 
+
 def stop_chart():
     """Stops the chart recorder"""
     results = tell_device('chart', req_stop)
     report("Stop chart recorder sez:", results)
 
+
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
     duration = data["duration"]
     start_chart(duration)
+
 
 def do_the_things():
     """Do our main loop actions, particularly listening to the
@@ -317,7 +337,7 @@ def do_the_things():
             # we keep looking if we have something waiting
             #   AND we haven't exceeded our count
             #   AND we haven't already rec'd a good rfid
-            while (rfid_device.in_waiting > 0 and count < rfid_send_count and 
+            while (rfid_device.in_waiting > 0 and count < rfid_send_count and
                    not rfid_good):
                 rfid_in = rfid_device.readline().strip()
                 # if the rfid has the proper length,
@@ -339,10 +359,11 @@ def do_the_things():
     except IOError:
         update("WARNING: Lost RFID device")
 
+
 def main():
     setup_serial()
     # This is our main loop that listens and responds
-    while 1 :
+    while 1:
         # check if all of our devices are active
         if not all_devices_live():
             setup_serial()
@@ -351,15 +372,14 @@ def main():
             do_the_things()
 
 
-if __name__=='__main__':
-    try:     
+if __name__ == '__main__':
+    try:
         # Enter the main loop
         main()
     except KeyboardInterrupt:
         report("")
         report("Exiting.")
-    # except Exception as e: 
+    # except Exception as e:
     #     print ""
     #     print str(e)
     # except:
-
