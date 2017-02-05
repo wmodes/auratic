@@ -15,10 +15,10 @@ const int PENMIN = 70;       // minimum alloable rotation of servo
 const int PENMAX = 120;     // maximam allowable rotation of servo
 const int PENAMP = (PENMAX - PENMIN) / 2; // max allowable amplitude
 const int PENREST = PENMIN + PENAMP;  // where pen rests, center of min & max
-const int PENPERIOD = 25;  // number of moves between start and end of full cycle
+const int PENPERIOD = 100;  // number of moves between start and end of full cycle
 const int PENFREQ = 1;      // number of full waves to make in each cycle
 
-const int GLOBAL_WAIT = 5;
+const int GLOBAL_WAIT = 10;
 
 const int AVAILPENS[] = {9, 10, 11, 3, 5, 6};   // avail arduino pins (order of pref)
 const int MAXPENS = sizeof(AVAILPENS);
