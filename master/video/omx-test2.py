@@ -9,7 +9,7 @@ trans_films = [
         "tv-color-bars-distorted.mp4",
         "tv-color-bars.mp4",
         "tv-color-calibration.mp4",
-        "tv-static-transition.mp4",
+        #"tv-static-transition.mp4",
         "tv-static-transition2.mp4"
         ]
 
