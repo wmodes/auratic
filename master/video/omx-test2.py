@@ -50,6 +50,8 @@ def play_film(player, filename="demo.mp4", duration=0, position=0):
     # if duration is imposible, set it to the length_to_end
     if duration == 0 or duration > length_to_end:
         wait = length_to_end - trim_from_end
+    else:
+        wait = duration
     if wait < 0:
         wait = 0
     debug("  full length: ", full_length)
