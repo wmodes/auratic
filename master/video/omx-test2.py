@@ -33,7 +33,7 @@ def play_film(player, filename="demo.mp4", duration=0, position=0):
     debug("\nfilename:", filename)
     debug("  position:", position)
     debug("  duration:", duration)
-    trim_from_end = 1
+    trim_from_end = 0.5
     #trim_from_end = 0
     player.load(filename)
     player.set_position(0.0)
@@ -49,10 +49,12 @@ def play_film(player, filename="demo.mp4", duration=0, position=0):
     length_to_end = player.duration()
     # if duration is imposible, set it to the length_to_end
     if duration == 0 or duration > length_to_end:
-        duration = length_to_end - trim_from_end
+        wait = length_to_end - trim_from_end
+    if wait < 0:
+        wait = 0
     debug("  full length: ", full_length)
     debug("  length to end: ", length_to_end)
-    debug("  our duration: ", duration)
+    debug("  wait: ", wait)
     sleep(duration)
     debug("  post sleep pos:", player.position())
     #player.pause()
