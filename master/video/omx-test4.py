@@ -1,15 +1,19 @@
 from time import sleep
 from random import choice 
-import subprocess
+from subprocess import Popen
+import os
 
 from video_db import *
 
+DEBUG = True
 
-DEBUG = False
+OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh']
+OMX_LOOP_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--loop']
 
 transition_film_list = []
 content_film_list = []
 
+pgid_last_video = None
 
 def debug(*args):
     if (DEBUG):
@@ -26,6 +30,7 @@ def create_film_lists():
 
 
 def play_default_film(film):
+    pass
 
 
 def play_film_object(film):
@@ -34,13 +39,15 @@ def play_film_object(film):
     debug("  start:", film['start'])
     debug("  end:", film['start']+film['length'])
     debug("  length:", film['length'])
-    nullin = open('/dev/null', 'r')
-    nullout = open('/dev/null', 'w')
-    #proc = Popen(['omxplayer', '--no-osd', film, shell=True, stdin=subprocess.DEVNULL)
-    proc = Popen(['omxplayer', '--no-osd', film['name']], shell=True,
-            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, strerr=subprocess.DEVNULL)
+    nullin = open(os.devnull, 'r')
+    nullout = open(os.devnull, 'w')
+    #proc = Popen(['omxplayer', '--no-osd', '--no-keys', '--refresh', --loop', film], stdin=nullin)
+    my_cmd = " ".join(OMX_CMD + film['name'])
+    proc = Popen(my_cmd, shell=True, stdin=nullin)
+    pgid_last_video = os.getpgid(proc.pid)
     sleep(film['length'])
-    proc.kill()
+    #debug("  proc:", proc).pid
+    os.killpg(pgid_last_video, signal.SIGTERM)
     nullin.close()
     nullout.close()
     return True
