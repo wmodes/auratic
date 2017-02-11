@@ -5,7 +5,7 @@ file_path_or_url = 'small.mp4'
 
 from video_db import *
 
-DEBUG = True
+DEBUG = False
 
 transition_film_list = []
 content_film_list = []
@@ -33,8 +33,8 @@ def play_film_object(player, film):
     debug("  length:", film['length'])
     player.set_position(film['start'])
     debug("  pre-play pos:", player.position())
-    if not player.is_playing():
-        player.play()
+    #if not player.is_playing():
+        #player.play()
     sleep(film['length'])
     # while (player.position() < film['start']+film['length']):
     #     pass
@@ -46,11 +46,11 @@ def play_film_object(player, film):
 def main():
 
     create_film_lists()
-    print transition_film_list
-    print content_film_list
+    #print transition_film_list
+    #print content_film_list
 
     try:
-        player = OMXPlayer(one_big_film)
+        player = OMXPlayer(one_big_film, args=["--no-osd"])
 
         while True:
             play_film_object(player, choice(transition_film_list))
