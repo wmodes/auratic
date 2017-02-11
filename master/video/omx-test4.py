@@ -1,9 +1,9 @@
 from time import sleep
 from random import choice 
-from subprocess import Popen
-
+import subprocess
 
 from video_db import *
+
 
 DEBUG = False
 
@@ -25,6 +25,8 @@ def create_film_lists():
             content_film_list.append(film)
 
 
+
+
 def play_film_object(film):
     debug("\nfilename:", film['name'])
     debug("  type", film['type'])
@@ -33,7 +35,8 @@ def play_film_object(film):
     debug("  length:", film['length'])
     nullin = open('/dev/null', 'r')
     nullout = open('/dev/null', 'w')
-    proc = Popen(['omxplayer', '--no-osd', film['name']], stdin=nullin)
+    proc = Popen(['omxplayer', '--no-osd', film['name']], 
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, strerr=subprocess.DEVNULL, shell=True)
     sleep(film['length'])
     proc.kill()
     nullin.close()
