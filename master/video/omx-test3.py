@@ -21,7 +21,7 @@ def create_film_lists():
     for film in films.values():
         if film['type'] == 'transition':
             transition_film_list.append(film)
-        elif film['type'] == 'transition':
+        elif film['type'] == 'content':
             content_film_list.append(film)
 
 
