@@ -67,17 +67,18 @@ def play_film(player, filename="demo.mp4", duration=0, position=0):
 
 def main():
 
-    try:
+    # try:
         player = OMXPlayer(choice(trans_films))
+        play_film(player, "tv-static-transition.mp4", duration=1)
 
-        while True:
-            play_film(player, choice(trans_films), duration=1)
-            play_film(player, choice(rotate_films), duration=10)
-        print "Done."
+    #     while True:
+    #         play_film(player, choice(trans_films), duration=1)
+    #         play_film(player, choice(rotate_films), duration=10)
+    #     print "Done."
 
-    except KeyboardInterrupt:
-        # Kill the `omxplayer` process gracefully.
-        player.quit()
+    # except KeyboardInterrupt:
+    #     # Kill the `omxplayer` process gracefully.
+    #     player.quit()
 
 if __name__ == "__main__":
     main()
