@@ -8,9 +8,7 @@ from video_db import *
 DEBUG = True
 
 trans_films = []
-
 content_films = []
-
 
 
 def debug(*args):
@@ -20,7 +18,7 @@ def debug(*args):
 
 
 def create_film_lists():
-    for film in films:
+    for film in films.values():
         if film['type'] == 'transition':
             trans_films.append(film)
         elif film['content'] == 'transition':
