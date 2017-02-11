@@ -9,7 +9,7 @@ trans_films = [
         "tv-color-bars-distorted.mp4",
         "tv-color-bars.mp4",
         "tv-color-calibration.mp4",
-        #"tv-static-transition.mp4",
+        "tv-static-transition.mp4",
         "tv-static-transition2.mp4"
         ]
 
@@ -57,7 +57,7 @@ def play_film(player, filename="demo.mp4", duration=0, position=0):
     debug("  full length: ", full_length)
     debug("  length to end: ", length_to_end)
     debug("  wait: ", wait)
-    sleep(duration)
+    sleep(wait)
     debug("  post sleep pos:", player.position())
     #player.pause()
     #player.stop()
@@ -81,3 +81,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
