@@ -33,7 +33,8 @@ def play_film_object(player, film):
     debug("  length:", film['length'])
     player.set_position(film['start'])
     debug("  pre-play pos:", player.position())
-    player.play()
+    if not player.is_playing():
+        player.play()
     sleep(film['length'])
     # while (player.position() < film['start']+film['length']):
     #     pass
