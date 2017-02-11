@@ -7,31 +7,31 @@ films = {
         {'name': "tv-color-bars-distorted.mp4",
             'type': 'transition',
             'start': 0.0,
-            'length': 1.0,
+            'length': 0.5,
         },
     "tv-color-bars":
         {'name': "tv-color-bars.mp4",
             'type': 'transition',
             'start': 1.0, #1:01
-            'length': 1.0,
+            'length': 0.5,
         },
     "tv-color-calibration":
         {'name': "tv-color-calibration.mp4",
             'type': 'transition',
             'start': 2.0, #2.02
-            'length': 1.0,
+            'length': 0.5,
         },
     "tv-static-transition":
         {'name': "tv-static-transition.mp4",
             'type': 'transition',
             'start': 3.0, #3:03
-            'length': 1.0,
+            'length': 0.5,
         },
     "tv-static-transition2":
         {'name': "tv-static-transition2.mp4",
             'type': 'transition',
             'start': 4.0, #4:03
-            'length': 1.0,
+            'length': 0.5,
         },
     "1960s-baltimore-family":
         {'name': "1960s-baltimore-family.mp4",

@@ -1,4 +1,4 @@
-    
+from omxplayer import OMXPlayer
 from time import sleep
 from random import choice 
 file_path_or_url = 'small.mp4'
