@@ -5,12 +5,15 @@ import os
 
 from video_db import *
 
-
 DEBUG = True
+
+OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh']
+OMX_LOOP_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--loop']
 
 transition_film_list = []
 content_film_list = []
 
+pgid_last_video = None
 
 def debug(*args):
     if (DEBUG):
@@ -26,6 +29,10 @@ def create_film_lists():
             content_film_list.append(film)
 
 
+def play_default_film(film):
+    pass
+
+
 def play_film_object(film):
     debug("\nfilename:", film['name'])
     debug("  type", film['type'])
@@ -34,11 +41,13 @@ def play_film_object(film):
     debug("  length:", film['length'])
     nullin = open(os.devnull, 'r')
     nullout = open(os.devnull, 'w')
-    proc = Popen('omxplayer --no-osd --no-keys --refresh ' + film['name'], 
-            stdin=nullin, shell=True)
+    #proc = Popen(['omxplayer', '--no-osd', '--no-keys', '--refresh', --loop', film], stdin=nullin)
+    my_cmd = " ".join(OMX_CMD + film['name'])
+    proc = Popen(my_cmd, shell=True, stdin=nullin)
+    pgid_last_video = os.getpgid(proc.pid)
     sleep(film['length'])
     #debug("  proc:", proc).pid
-    proc.kill()
+    os.killpg(pgid_last_video, signal.SIGTERM)
     nullin.close()
     nullout.close()
     return True
