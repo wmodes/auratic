@@ -8,9 +8,7 @@ from video_db import *
 DEBUG = True
 
 trans_films = []
-
 content_films = []
-
 
 
 def debug(*args):
@@ -45,17 +43,21 @@ def play_film_object(player, film):
 
 def main():
 
+    create_film_lists()
+    print trans_films
+    print content_films
+
     try:
         player = OMXPlayer(one_big_film)
 
         while True:
-            play_film(player, choice(trans_films))
-            play_film(player, choice(rotate_films))
+            play_film_object(player, choice(trans_films))
+            play_film_object(player, choice(rotate_films))
         print "Done."
 
-    # except KeyboardInterrupt:
-    #     # Kill the `omxplayer` process gracefully.
-    #     player.quit()
+    except KeyboardInterrupt:
+        # Kill the `omxplayer` process gracefully.
+        player.quit()
 
 if __name__ == "__main__":
     main()
