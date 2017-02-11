@@ -1,4 +1,3 @@
-from omxplayer import OMXPlayer
 from time import sleep
 from random import choice 
 from subprocess import Popen
@@ -26,22 +25,19 @@ def create_film_lists():
             content_film_list.append(film)
 
 
-def play_film_object(player, film):
+def play_film_object(film):
     debug("\nfilename:", film['name'])
     debug("  type", film['type'])
     debug("  start:", film['start'])
     debug("  end:", film['start']+film['length'])
     debug("  length:", film['length'])
-    Popen(['omxplayer', '--no-osd', film['name']])
-    #player.set_position(film['start'])
-    debug("  pre-play pos:", player.position())
-    #if not player.is_playing():
-        #player.play()
+    nullin = open('/dev/null', 'r')
+    nullout = open('/dev/null', 'w')
+    proc = Popen(['omxplayer', '--no-osd', film['name']], stdin=nullin)
     sleep(film['length'])
-    # while (player.position() < film['start']+film['length']):
-    #     pass
-    debug("  post wait pos:", player.position())
-    #player.pause()
+    proc.kill()
+    nullin.close()
+    nullout.close()
     return True
 
 
@@ -52,16 +48,14 @@ def main():
     #print content_film_list
 
     try:
-        #player = OMXPlayer(one_big_film, args=["--no-osd"])
 
         while True:
-            play_film_object(player, choice(transition_film_list))
-            play_film_object(player, choice(content_film_list))
+            play_film_object(choice(transition_film_list))
+            play_film_object(choice(content_film_list))
         print "Done."
 
     except KeyboardInterrupt:
-        # Kill the `omxplayer` process gracefully.
-        player.quit()
+        pass
 
 if __name__ == "__main__":
     main()
