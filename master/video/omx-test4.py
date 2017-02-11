@@ -1,7 +1,8 @@
 from omxplayer import OMXPlayer
 from time import sleep
 from random import choice 
-file_path_or_url = 'small.mp4'
+from subprocess import Popen
+
 
 from video_db import *
 
@@ -31,7 +32,8 @@ def play_film_object(player, film):
     debug("  start:", film['start'])
     debug("  end:", film['start']+film['length'])
     debug("  length:", film['length'])
-    player.set_position(film['start'])
+    Popen(['omxplayer', '--no-osd', film['name']])
+    #player.set_position(film['start'])
     debug("  pre-play pos:", player.position())
     #if not player.is_playing():
         #player.play()
@@ -50,7 +52,7 @@ def main():
     #print content_film_list
 
     try:
-        player = OMXPlayer(one_big_film, args=["--no-osd"])
+        #player = OMXPlayer(one_big_film, args=["--no-osd"])
 
         while True:
             play_film_object(player, choice(transition_film_list))
