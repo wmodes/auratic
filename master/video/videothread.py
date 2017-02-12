@@ -135,7 +135,7 @@ class VideoThread(threading.Thread):
             self._player_pgid = None
             self._current_video = None
         except:
-            self.__debug_("Couldn't signal", pgid)
+            self.__debug_("Couldn't terminate %i (%s)" % (pgid, self._current_video['name']))
             pass
 
 
@@ -172,6 +172,7 @@ def main():
         ]
     video = VideoThread(debug=2)
     video.start_sequence([films[1], films[3], films[2]])
+    time.sleep(2)
 
 if __name__ == "__main__":
     main()
