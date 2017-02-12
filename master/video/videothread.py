@@ -122,9 +122,10 @@ class VideoThread(threading.Thread):
             while (not self.stopped() and 
                    (time.time() <= start_time + video['length'] - INTER_VIDEO_DELAY)):
                 pass
-            self.__debug_("setting %.2fs kill timer for %i (%s)" % 
-                          (INTER_VIDEO_DELAY, pgid, video['name']))
-            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid, video['name']]).start()
+            if (video[type] != 'loop'):
+                self.__debug_("setting %.2fs kill timer for %i (%s)" % 
+                              (INTER_VIDEO_DELAY, pgid, video['name']))
+                threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid, video['name']]).start()
         # except:
         #     self.__debug_("Unable to start video", video['name'], l=0)
 
