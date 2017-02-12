@@ -172,7 +172,8 @@ def main():
         ]
     video = VideoThread(debug=2)
     video.start_sequence([films[1], films[3], films[2]])
-    time.sleep(4)
+    print "Started sequence"
+    time.sleep(2)
 
 if __name__ == "__main__":
     main()
