@@ -3,6 +3,24 @@
 one_big_film = "one_big_film1.mp4"
 
 films = {
+    "loop-under-construction": 
+        {'name': "loop-under-construction.mp4",
+            'type': 'loop',
+            'start': 0.0,
+            'length': 0.0,
+        },
+    "loop-cold-night": 
+        {'name': "loop-cold-night.mp4",
+            'type': 'loop',
+            'start': 0.0,
+            'length': 0.0,
+        },
+    "loop-swamp": 
+        {'name': "loop-swamp.mp4",
+            'type': 'loop',
+            'start': 0.0,
+            'length': 0.0,
+        },
     "tv-color-bars-distorted": 
         {'name': "tv-color-bars-distorted.mp4",
             'type': 'transition',
