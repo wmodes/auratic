@@ -1,7 +1,9 @@
 from time import sleep
-from random import choice 
+from random import choice
 from subprocess import Popen, call
-import sys, os, signal
+import sys
+import os
+import signal
 import threading
 
 from video_db import *
@@ -11,10 +13,10 @@ DEBUG = True
 inter_video_delay = 0.75
 
 OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode fill']
-#OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--aspect-mode fill']
-#CONTENT_CMD = OMX_CMD + ['--layer 4']
-#TRANSITION_CMD = OMX_CMD + ['--layer 5']
-#LOOP_CMD = OMX_CMD + ['--layer 1', '--loop']
+# OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--aspect-mode fill']
+# CONTENT_CMD = OMX_CMD + ['--layer 4']
+# TRANSITION_CMD = OMX_CMD + ['--layer 5']
+# LOOP_CMD = OMX_CMD + ['--layer 1', '--loop']
 CONTENT_CMD = OMX_CMD + ['--layer 4', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer1']
 TRANSITION_CMD = OMX_CMD + ['--layer 5', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer2']
 LOOP_CMD = OMX_CMD + ['--layer 1', '--loop', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer3']
@@ -192,7 +194,7 @@ def start_sequence(content):
         active_thread.stop()
         active_thread = None
         thread = active_threads.pop()
-    active_thread = StoppableThread(target = threaded_sequence, args = (content,))
+    active_thread = StoppableThread(target=threaded_sequence, args=(content,))
     active_thread.start()
     active_threads.append(active_thread)
 
