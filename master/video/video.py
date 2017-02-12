@@ -54,7 +54,9 @@ def main():
         while True:
             max_content = len(content_film_list)-1
             print ""
-            next_film = raw_input("Next video (0-%i): " % max_content)
+            next_film = raw_input("Next video (0-%i or 'q' to quit): " % max_content)
+            if ('q' in next_film):
+                break
             try:
                 next_film = int(next_film)
             except:
