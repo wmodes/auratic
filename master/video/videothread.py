@@ -124,19 +124,18 @@ class VideoThread(threading.Thread):
                 pass
             self.__debug_("setting %.2fs kill timer for %i (%s)" % 
                           (INTER_VIDEO_DELAY, pgid, video['name']))
-            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid]).start()
+            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid, video['name']]).start()
         # except:
         #     self.__debug_("Unable to start video", video['name'], l=0)
 
-    def __stop_video__(self, pgid):
+    def __stop_video__(self, pgid, name):
         try:
-            name = self._current_video['name']
-            self.__debug_("Killing process %i (%s)" % (pgid, name))
+            self.__debug_("Killing process %i (%s)" % (pgid, name)
             os.killpg(pgid, signal.SIGTERM)
             self._player_pgid = None
             self._current_video = None
         except OSError:
-            self.__debug_("Couldn't terminate %i (%s)" % (pgid, name))
+            self.__debug_("Couldn't terminate %i (%s)" % (pgid, name)
             pass
 
 
