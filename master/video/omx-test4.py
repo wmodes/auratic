@@ -83,6 +83,7 @@ def start_loop(film):
     # start new video (saving the process handle)
     my_cmd = " ".join(LOOP_CMD + [film['name']])
     debug("cmd:", my_cmd)
+    # TODO: Reinstate wait, ignore process group, etc
     proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
     # save this process group id
     pgid = os.getpgid(proc.pid)
@@ -138,6 +139,7 @@ def start_content(film):
     # start new video (saving the process handle)
     my_cmd = " ".join(CONTENT_CMD + ['--pos', str(film['start']), film['name']])
     debug("cmd:", my_cmd)
+    # TODO: Reinstate wait, ignore process group, etc
     proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
     #proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
     # save this process group id
