@@ -114,11 +114,11 @@ class VideoThread(threading.Thread):
                 proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
             # save this process group id
             self._player_pgid = os.getpgid(proc.pid)
-            self.__debug_("pgid:", self._player_pgid)
+            self.__debug_("Starting process: %i (%s)" % (self._player_pgid, video['name']))
             # self.__debug_("setting kill timer for %i: %i sec" % (self._player_pgid, video['length']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
-            while (not self.stopped() and (time.time() >= start_time + video['length'])):
+            while (not self.stopped() and (time.time() <= start_time + video['length'])):
                 pass
             self.__stop_video__()
         # except:
@@ -129,6 +129,7 @@ class VideoThread(threading.Thread):
             self.__debug_("Killing process %i (%s)" % (self._player_pgid, self._current_video['name']))
             os.killpg(self._player_pgid, signal.SIGTERM)
             self._player_pgid = None
+            self._current_video = None
         except:
             self.__debug_("Couldn't signal", self._player_pgid)
             pass
