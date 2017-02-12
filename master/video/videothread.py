@@ -29,12 +29,13 @@ class VideoThread(threading.Thread):
     _example = """
         The class takes a list containing one or more dictionaries containing
         data about the videos to be played:
-            [{'name': "idle_2.mp4", # filename of the file
-              'type': 'loop',       # video type: loop, transition, or content
-              'start': 0.0,         # start position in video (sec)
-              'length': 0.0,        # duration to play (sec)
-              'layer': 1,           # omxplayer layer on which to display
-              'disabled': False     # If set, record is ignored
+            [{'name': "idle_2",                 # name of the video
+              'file': "../media/idle_2.mp4",    # filename of the file
+              'type': 'loop',                   # video type: loop, transition, or content
+              'start': 0.0,                     # start position in video (sec)
+              'length': 0.0,                    # duration to play (sec)
+              'layer': 1,                       # omxplayer layer on which to display
+              'disabled': False                 # If set, record is ignored
             }]
         """
 
@@ -65,23 +66,23 @@ class VideoThread(threading.Thread):
             level = kwargs["level"]
         elif("l" in kwargs):
             level = kwargs["l"]
-        # if (level >= self.debug):
-        text = " ".join(list(map(str, args)))
-        # get name of calling function
-        caller = sys._getframe(1).f_code.co_name
-        if (caller == self._last_debug_caller):
-            print "  DEBUG: %s: %s" % (caller, text)
-        else:
-            print "DEBUG: %s: %s" % (caller, text)
-        # save last calling function
-        self._last_debug_caller = caller
+        if (self._debug >= level):
+            text = " ".join(list(map(str, args)))
+            # get name of calling function
+            caller = sys._getframe(1).f_code.co_name
+            if (caller == self._last_debug_caller):
+                print "  debug: %s: %s" % (caller, text)
+            else:
+                print "debug: %s: %s" % (caller, text)
+            # save last calling function
+            self._last_debug_caller = caller
 
     def start_sequence(self, playlist):
         if not isinstance(playlist, list):
             raise ValueError(self._example)
         for video in playlist:
             if not self.stopped():
-                self.__debug_("Starting:", video)
+                self.__debug_("Starting:", video['name'])
                 self.__start_video__(video)
 
     def __start_video__(self, video):
@@ -91,17 +92,18 @@ class VideoThread(threading.Thread):
             self.__debug_("not played:", video['name'], "disabled")
             return
         self._current_video = video
-        self.__debug_("name:%s type:%s start:%.1fs end:%.1fs len:%.1fs" %
-                      (video['name'], video['type'], video['start'],
+        self.__debug_("name: %s (%s)" %  (video['name'], video['file']))
+        self.__debug_("type: %s, start: %.1fs, end: %.1fs, len: %.1fs" %
+                      (video['type'], video['start'],
                        video['start']+video['length'], video['length']))
         # construct the player command
         if (video['type'] == 'loop'):
-            my_cmd = " ".join(LOOP_CMD + [video['name']])
+            my_cmd = " ".join(LOOP_CMD + [video['file']])
         elif (video['type'] == 'transition'):
-            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), video['name']])
+            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), video['file']])
         elif (video['type'] == 'content'):
-            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['name']])
-        self.__debug_("cmd:", my_cmd)
+            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['file']])
+        self.__debug_("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
         try:
             proc = None
@@ -129,3 +131,41 @@ class VideoThread(threading.Thread):
         except:
             self.__debug_("Couldn't signal", self._player_pgid)
             pass
+
+
+def main():
+    films = [
+        {'name': "idle_2",
+            'file': "../media/idle_2.mp4",
+            'type': 'loop',
+            'start': 0.0,
+            'length': 0.0,
+            'layer': 1,
+         },
+        {'name': "tv-color-bars-distorted",
+            'file': "../media/tv-color-bars-distorted.mp4",
+            'type': 'transition',
+            'start': 0.0,
+            'length': 1.0,
+            'layer': 9,
+         },
+        {'name': "tv-static-transition",
+            'file': "../media/tv-static-transition.mp4",
+            'type': 'transition',
+            'start': 0.0,
+            'length': 1.0,
+            'layer': 9,
+         },
+        {'name': "1960s-baltimore-family",
+            'file': "../media/1960s-baltimore-family.mp4",
+            'type': 'content',
+            'start': 0.0,
+            'length': 5.0,
+            'layer': 5,
+         },
+        ]
+    video = VideoThread(debug=1)
+    video.start_sequence([films[1], films[3], films[2]])
+
+if __name__ == "__main__":
+    main()
