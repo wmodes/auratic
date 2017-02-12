@@ -1,0 +1,6 @@
+*killme*
+env*
+*.pyc
+nohup.out
+*.swp
+*.mp4
