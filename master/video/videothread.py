@@ -164,7 +164,7 @@ def main():
             'layer': 5,
          },
         ]
-    video = VideoThread(debug=1)
+    video = VideoThread(debug=2)
     video.start_sequence([films[1], films[3], films[2]])
 
 if __name__ == "__main__":
