@@ -49,7 +49,7 @@ def main():
     create_film_lists()
     try:
         loop_film = choice(loop_film_list)
-        loop = videothread.VideoThread([loop_film])
+        loop = videothread.VideoThread([loop_film], debug=1)
 
         while True:
             max_content = len(content_film_list)-1
@@ -64,7 +64,7 @@ def main():
             trans1_film = choice(transition_film_list)
             trans2_film = choice(transition_film_list)
             content_film = content_film_list[next_film]
-            loop = videothread.VideoThread([trans1_film, content_film, trans2_film])
+            loop = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
 
     except KeyboardInterrupt:
         print ""
