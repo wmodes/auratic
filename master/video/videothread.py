@@ -13,6 +13,7 @@ __copyright__ = "2017, MIT"
 
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
+INTER_VIDEO_DELAY = 0.75
 
 OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode fill']
 CONTENT_CMD = OMX_CMD + ['--layer 4', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer1']
@@ -105,8 +106,7 @@ class VideoThread(threading.Thread):
             my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['file']])
         self.__debug_("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
-        # try:
-        if True:
+        try:
             proc = None
             if (self._debug >= 2):
                 proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
@@ -118,11 +118,14 @@ class VideoThread(threading.Thread):
             # self.__debug_("setting kill timer for %i: %i sec" % (self._player_pgid, video['length']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
-            while (not self.stopped() and (time.time() <= start_time + video['length'])):
+            while (not self.stopped() and 
+                   (time.time() <= start_time + video['length'] - INTER_VIDEO_DELAY)):
                 pass
-            self.__stop_video__()
-        # except:
-            # self.__debug_("Unable to start video", video['name'], l=0)
+            debug("setting %is kill timer for %i (%s)" % 
+                  (self._player_pgid, INTER_VIDEO_DELAY, video['name']))
+            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__)
+        except:
+            self.__debug_("Unable to start video", video['name'], l=0)
 
     def __stop_video__(self):
         try:
