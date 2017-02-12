@@ -47,7 +47,7 @@ films = [
             'type': 'transition',
             'start': 0.0,
             'length': 1.0,
-            'disabled': True
+            'disabled': True,
             'layer': 9,
          },
         {'name': "tv-color-calibration",
