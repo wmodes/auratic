@@ -114,27 +114,28 @@ class VideoThread(threading.Thread):
             else:
                 proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
             # save this process group id
-            self._player_pgid = os.getpgid(proc.pid)
-            self.__debug_("Starting process: %i (%s)" % (self._player_pgid, video['name']))
+            pgid = os.getpgid(proc.pid)
+            self._player_pgid = pgid 
+            self.__debug_("Starting process: %i (%s)" % (pgid, video['name']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
             while (not self.stopped() and 
                    (time.time() <= start_time + video['length'] - INTER_VIDEO_DELAY)):
                 pass
             self.__debug_("setting %is kill timer for %i (%s)" % 
-                          (self._player_pgid, INTER_VIDEO_DELAY, video['name']))
-            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__)
+                          (pgid, INTER_VIDEO_DELAY, video['name']))
+            threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid])
         # except:
         #     self.__debug_("Unable to start video", video['name'], l=0)
 
-    def __stop_video__(self):
+    def __stop_video__(self, pgid):
         try:
-            self.__debug_("Killing process %i (%s)" % (self._player_pgid, self._current_video['name']))
-            os.killpg(self._player_pgid, signal.SIGTERM)
+            self.__debug_("Killing process %i (%s)" % (pgid, self._current_video['name']))
+            os.killpg(pgid, signal.SIGTERM)
             self._player_pgid = None
             self._current_video = None
         except:
-            self.__debug_("Couldn't signal", self._player_pgid)
+            self.__debug_("Couldn't signal", pgid)
             pass
 
 
