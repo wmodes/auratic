@@ -170,6 +170,7 @@ def main():
             'layer': 5,
          },
         ]
+    print "Start sequence"
     video = VideoThread(debug=2)
     video.start_sequence([films[1], films[3], films[2]])
     print "Started sequence"
