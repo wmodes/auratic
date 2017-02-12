@@ -130,12 +130,12 @@ class VideoThread(threading.Thread):
 
     def __stop_video__(self, pgid, name):
         try:
-            self.__debug_("Killing process %i (%s)" % (pgid, name)
+            self.__debug_("Killing process %i (%s)" % (pgid, name))
             os.killpg(pgid, signal.SIGTERM)
             self._player_pgid = None
             self._current_video = None
         except OSError:
-            self.__debug_("Couldn't terminate %i (%s)" % (pgid, name)
+            self.__debug_("Couldn't terminate %i (%s)" % (pgid, name))
             pass
 
 
