@@ -1,6 +1,6 @@
 from time import sleep
 from random import choice 
-from subprocess import Popen
+from subprocess import Popen, call
 import sys, os, signal
 import threading
 
@@ -10,8 +10,8 @@ DEBUG = True
 
 inter_video_delay = 0.75
 
-#OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode fill']
-OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--aspect-mode fill']
+OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode fill']
+#OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--aspect-mode fill']
 #CONTENT_CMD = OMX_CMD + ['--layer 4']
 #TRANSITION_CMD = OMX_CMD + ['--layer 5']
 #LOOP_CMD = OMX_CMD + ['--layer 1', '--loop']
@@ -26,6 +26,9 @@ loop_film_list = []
 pgid_last_loop = None
 pgid_last_content = None
 pgid_last_transition = None
+
+active_threads = []
+active_thread = None
 
 nullin = open(os.devnull, 'r')
 nullout = open(os.devnull, 'w')
@@ -44,44 +47,24 @@ def debug(*args):
         last_caller = caller
 
 
+#
+# Prepatory
+#
+
 def create_film_lists():
-    for film in films.values():
-        if film['type'] == 'transition':
-            transition_film_list.append(film)
-        elif film['type'] == 'content':
-            content_film_list.append(film)
-        elif film['type'] == 'loop':
-            loop_film_list.append(film)
+    for film in films:
+        if 'disabled' not in film or not film['disabled']:
+            if film['type'] == 'transition':
+                transition_film_list.append(film)
+            elif film['type'] == 'content':
+                content_film_list.append(film)
+            elif film['type'] == 'loop':
+                loop_film_list.append(film)
 
 
-def start_transition(film):
-    global pgid_last_transition
-    debug("filename:", film['name'])
-    debug("type", film['type'])
-    debug("start:", film['start'], "sec")
-    debug("end:", film['start']+film['length'], "sec")
-    debug("length:", film['length'], "sec")
-    my_cmd = " ".join(TRANSITION_CMD + [film['name']])
-    debug("cmd:", my_cmd)
-    proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
-    #sleep(film['length'])
-    # save this process group id
-    pgid = os.getpgid(proc.pid)
-    debug("pgid:", pgid)
-    pgid_last_transition = pgid
-    debug("setting kill timer:", film['length'], "sec")
-    threading.Timer(film['length'], stop_transition, [pgid]).start()
-
-def stop_transition(pgid):
-    global pgid_last_transition
-    try:
-        debug("Kiling", pgid)
-        os.killpg(pgid, signal.SIGTERM)
-        pgid_last_transition = None
-    except:
-        debug("Couldn't signal", pgid)
-        pass
-
+#
+# Starting & Stopping Videos
+#
 
 def start_loop(film):
     global pgid_last_loop
@@ -106,6 +89,38 @@ def start_loop(film):
     debug("pgid:", pgid)
     pgid_last_loop = pgid
 
+
+def start_transition(film):
+    global pgid_last_transition
+    debug("filename:", film['name'])
+    debug("type", film['type'])
+    debug("start:", film['start'], "sec")
+    debug("end:", film['start']+film['length'], "sec")
+    debug("length:", film['length'], "sec")
+    my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(film['start']), film['name']])
+    debug("cmd:", my_cmd)
+    proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
+    #proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
+    #sleep(film['length'])
+    # save this process group id
+    pgid = os.getpgid(proc.pid)
+    debug("pgid:", pgid)
+    pgid_last_transition = pgid
+    debug("setting kill timer for %i: %i sec" % (pgid, film['length']))
+    threading.Timer(film['length'], stop_transition, [pgid]).start()
+
+
+def stop_transition(my_pgid):
+    global pgid_last_transition
+    try:
+        debug("Kiling", my_pgid)
+        os.killpg(my_pgid, signal.SIGTERM)
+        pgid_last_transition = None
+    except:
+        debug("Couldn't signal", my_pgid)
+        pass
+
+
 def start_content(film):
     global pgid_last_content
     debug("filename:", film['name'])
@@ -121,34 +136,84 @@ def start_content(film):
         debug("previous content still running:", pgid_last_content, "(stopping in a sec)")
         stop_content_in_a_sec(pgid_last_content)
     # start new video (saving the process handle)
-    my_cmd = " ".join(CONTENT_CMD + [film['name']])
+    my_cmd = " ".join(CONTENT_CMD + ['--pos', str(film['start']), film['name']])
     debug("cmd:", my_cmd)
-    #proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
-    proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
+    proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
+    #proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
     # save this process group id
     pgid = os.getpgid(proc.pid)
     debug("pgid:", pgid)
     pgid_last_content = pgid
     if (film['length']):
-        debug("setting kill timer:", film['length'], "sec")
-        threading.Timer(film['length'], stop_content, [pgid]).start()
+        debug("setting kill timer for %i: %i sec" % (pgid, film['length']))
+        timer = threading.Timer(film['length'], stop_content, [pgid])
+        timer.start()
 
 
-def stop_content(pgid):
+def stop_content(my_pgid):
     global pgid_last_content
     try:
-        debug("Kiling", pgid)
-        result = os.killpg(pgid, signal.SIGTERM)
+        debug("Kiling", my_pgid)
+        result = os.killpg(my_pgid, signal.SIGTERM)
         debug("Result", result)
         pgid_last_content = None
     except:
-        debug("Couldn't signal", pgid)
+        debug("Couldn't signal", my_pgid)
         pass
 
 
 def stop_content_in_a_sec(pgid):
     threading.Timer(inter_video_delay, stop_content, [pgid]).start()
 
+#
+# Sequences
+#
+
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self, *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop = threading.Event()
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
+
+def start_sequence(content):
+    global active_thread
+    # kill any existing threads
+    while active_threads:
+        active_thread.stop()
+        active_thread = None
+        thread = active_threads.pop()
+    active_thread = StoppableThread(target = threaded_sequence, args = (content,))
+    active_thread.start()
+    active_threads.append(active_thread)
+
+def threaded_sequence(content):
+    # start first transition
+    start_transition(choice(transition_film_list))
+    # start content
+    start_content(content)
+    debug("Stopped? ", active_thread.stopped())
+    if active_thread.stopped():
+        return
+    # wait the length of the clip
+    sleep(content['length'] - inter_video_delay)
+    debug("Stopped? ", active_thread.stopped())
+    if active_thread.stopped():
+        return
+    # start second transition
+    start_transition(choice(transition_film_list))
+
+#
+# Main Loop
+#
+    
 
 def main():
 
@@ -170,21 +235,17 @@ def main():
                 continue
             if (next_film < 0 or next_film > max_content):
                 continue
-            transition = choice(transition_film_list)
-            start_transition(transition)
-            sleep(transition['length'] - inter_video_delay)
             content = content_film_list[next_film]
-            start_content(content)
-            sleep(content['length'] - inter_video_delay)
-            transition = choice(transition_film_list)
-            start_transition(transition)
-            sleep(transition['length'] - inter_video_delay)
+            start_sequence(content)
+            #sleep(transition['length'] - inter_video_delay)
             #start_loop(loop)
-            sleep(5)
+            #sleep(5)
 
     except KeyboardInterrupt:
+        print ""
         print "Done."
         # close our null file handles
+        call(["killall", "-9", "omxplayer", "omxplayer.bin"], stdout=nullout, stderr=nullout)
         nullin.close()
         nullout.close()
 
