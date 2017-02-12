@@ -105,9 +105,10 @@ class VideoThread(threading.Thread):
             my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['file']])
         self.__debug_("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
-        try:
+        # try:
+        if True:
             proc = None
-            if (_debug):
+            if (self._debug >= 2):
                 proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
             else:
                 proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
@@ -117,11 +118,11 @@ class VideoThread(threading.Thread):
             # self.__debug_("setting kill timer for %i: %i sec" % (self._player_pgid, video['length']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
-            while (not self.stopped() and (time.time() >= start_time + video('length'))):
+            while (not self.stopped() and (time.time() >= start_time + video['length'])):
                 pass
             self.__stop_video__()
-        except:
-            self.__debug_("Unable to start video", video['name'], l=0)
+        # except:
+            # self.__debug_("Unable to start video", video['name'], l=0)
 
     def __stop_video__(self):
         try:
