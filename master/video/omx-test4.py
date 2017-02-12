@@ -48,7 +48,7 @@ def debug(*args):
 
 
 #
-# Prepatory
+# Preparatory
 #
 
 def create_film_lists():
