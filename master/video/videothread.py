@@ -134,7 +134,7 @@ class VideoThread(threading.Thread):
             os.killpg(pgid, signal.SIGTERM)
             self._player_pgid = None
             self._current_video = None
-        except:
+        except OSError:
             self.__debug_("Couldn't terminate %i (%s)" % (pgid, self._current_video['name']))
             pass
 
