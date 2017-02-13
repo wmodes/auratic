@@ -12,11 +12,12 @@ int led = 13;
 int rfidLen = 41;
 int rfidByteCount = 14;
 int rfidCount = 3;
-int expireTime = 5000;
+unsigned long sameIdWaitTime = 30000;
+int delayBetweenReads = 1000;
 int debug = 0;
 
 String savedId = "";
-int savedTime = 0;
+unsigned long savedTime = 0;
 
 String reqId = "id";
 String rspId = "id:rfid";
@@ -50,15 +51,15 @@ void checkForRequests()
     else if (reqMaster.indexOf(reqStatus) >= 0) {
       Serial.println(reqStatus + ":" + rspAck);
     }
-    // did we receive a DEBUG request?
-    else if (reqMaster.indexOf(reqDebug) >= 0) {
-      Serial.println(reqDebug + ":" + rspAck);
-      debug = 1;
-    }
     // did we receive a NODEBUG request?
     else if (reqMaster.indexOf(reqNoDebug) >= 0) {
       Serial.println(reqNoDebug + ":" + rspAck);
       debug = 0;
+    }
+    // did we receive a DEBUG request?
+    else if (reqMaster.indexOf(reqDebug) >= 0) {
+      Serial.println(reqDebug + ":" + rspAck);
+      debug = 1;
     }
     else {
       Serial.println("Unknown-request:" + reqMaster);
@@ -96,50 +97,35 @@ void doTheThings()
     }
     // Is this the same ID we got last time?
     if (debug) {
-      Serial.print("debug: last:");
-      Serial.println(savedId);
-      Serial.print("debug: this:");
-      Serial.println(fullId);
+      Serial.print("debug: last: "); Serial.println(savedId);
+      Serial.print("debug: this: "); Serial.println(fullId);
     }
-    if (fullId == savedId) {
-      if (debug) Serial.println("debug: Same!");
-      if (millis() < (savedTime + expireTime)) {
-        if (debug) {
-          Serial.println("debug: and time's not up!");
-          Serial.print("old:");
-          Serial.print(savedTime);
-          Serial.print("new:");
-          Serial.print(millis());
-          Serial.print("compared with:");
-          Serial.println(savedTime + expireTime);
-        }
-        return;
-      }
-      else {
-        if (debug) {
-          Serial.println("debug: but time's up!");
-          Serial.print("old:");
-          Serial.print(savedTime);
-          Serial.print("new:");
-          Serial.print(millis());
-          Serial.print("compared with:");
-          Serial.println(savedTime + expireTime); 
-        }
+    // Is our ID the same as last time?
+    if ((fullId == savedId) && (millis() < (savedTime + sameIdWaitTime))) {
+      if (debug) {
+        Serial.println("debug: ids are the same and time's not up!");
+        Serial.print("old: "); Serial.print(savedTime);
+        Serial.print(" new: "); Serial.print(millis());
+        Serial.print(" compared with: ");
+        Serial.println(savedTime + sameIdWaitTime);
       }
     }
-    // We send three times to guard against serial data loss
-    for(int i = 0; i < rfidCount; i++) {
-      Serial.println(fullId);
+    else {
+      // We send three times to guard against serial data loss
+      for(int i = 0; i < rfidCount; i++) {
+        Serial.println(fullId);
+      }
+      // Save this ID
+      savedId = fullId;
+      savedTime = millis();
+      digitalWrite(led, HIGH);
+      delay(250);
+      digitalWrite(led, LOW);
+      delay(250);
+      delay(delayBetweenReads);
     }
-    // Okay, now we do a few things to make sure we don't rapid fire ids
+    // Okay, now to make sure we don't rapid fire ids
     RFID.flush();
-    // Save this ID
-    savedId = fullId;
-    savedTime = millis();
-    digitalWrite(led, HIGH);
-    delay(250);
-    digitalWrite(led, LOW);
-    delay(250);
   }
 }
 

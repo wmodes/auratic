@@ -281,6 +281,7 @@ def stop_chart():
 def listen_and_report():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
+    result = None
     try:
         update("Listening for RFID")
         rfid_device = devices['rfid']['handle']
@@ -303,18 +304,18 @@ def listen_and_report():
                 if len(rfid_in) == RFID_LENGTH:
                     rfid_good = rfid_in
                     report("    Received good RFID:", rfid_in)
-                    break
                 else:
                     report("    Received bad RFID:", rfid_in)
             if rfid_good:
                 report("RFID found:", rfid_good)
-                return(get_rfid_data(rfid_good))
+                result = get_rfid_data(rfid_good)
             # clear incoming buffer in case we have stuff waiting
             rfid_device.reset_input_buffer()
             rfid_device.flushInput()
             report("Continue listening for RFID")
     except IOError:
         update("WARNING: Lost RFID device")
+    return(result)
 
 
 def main():
