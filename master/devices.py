@@ -311,6 +311,7 @@ def listen_and_report():
                 return(get_rfid_data(rfid_good))
             # clear incoming buffer in case we have stuff waiting
             rfid_device.reset_input_buffer()
+            rfid_device.flushInput()
             report("Continue listening for RFID")
     except IOError:
         update("WARNING: Lost RFID device")
