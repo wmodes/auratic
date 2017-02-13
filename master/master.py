@@ -15,7 +15,7 @@ from video import *
 # Globals
 #
 
-old_video_thread = None
+old_video_threads = []
 
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
@@ -31,16 +31,18 @@ def trigger_actions(data):
     # start chart recorder
     start_chart(duration)
     # kill old film if necessary
-    try:
-        old_video_thread.stop()
-    except:
-        pass
+    # try:
+    while old_video_threads:
+        thread = pop(old_video_threads)
+        thread.stop()
+    # except:
+    #     pass
     # start films
     trans1_film = choice(transition_film_list)
     trans2_film = choice(transition_film_list)
     content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
     content_thread.start()
-    old_video_thread = content_thread
+    old_video_threads.append(content_thread)
 
 
 def main():
