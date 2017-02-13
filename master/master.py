@@ -32,7 +32,7 @@ def trigger_actions(data):
     start_chart(duration)
     # kill old film if necessary
     try:
-        old_content_thread.stop()
+        old_video_thread.stop()
     except:
         pass
     # start films
