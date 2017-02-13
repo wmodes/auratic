@@ -17,7 +17,7 @@ import threading
 
 # Constants
 #
-DEBUG = 0
+DEBUG = 1
 USB_PORT_PREFIX = "/dev/ttyUSB"
 MAX_USB_PORTS = 12
 RFID_SEND_COUNT = 3
@@ -314,13 +314,7 @@ def stop_chart():
             report("Stopping %s. It responds: %s" % (device['name'], results))
 
 
-def trigger_actions(data):
-    """Trigger all of the actions specified by the database"""
-    duration = data["duration"]
-    start_chart(duration)
-
-
-def do_the_things():
+def listen_and_report():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
     try:
@@ -350,9 +344,7 @@ def do_the_things():
                     report("    Received bad RFID:", rfid_in)
             if rfid_good:
                 report("RFID found:", rfid_good)
-                data = get_rfid_data(rfid_good)
-                display_found_object(data)
-                trigger_actions(data)
+                return(get_rfid_data(rfid_good))
             # clear incoming buffer in case we have stuff waiting
             rfid_device.reset_input_buffer()
             report("Continue listening for RFID")
@@ -369,7 +361,7 @@ def main():
             setup_serial()
         # let's take actions if we can
         if all_critical_devices_live():
-            do_the_things()
+            listen_and_report()
 
 
 if __name__ == '__main__':

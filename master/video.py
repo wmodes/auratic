@@ -18,7 +18,6 @@ from video_db import *
 # Constants
 #
 
-DEBUG = True
 
 #
 # Globals
@@ -35,6 +34,7 @@ content_film_dict = {}
 #
 
 def create_film_lists():
+    """Iterate through imported database and sort list by type"""
     for film in films:
         if 'disabled' not in film or not film['disabled']:
             if film['type'] == 'transition':
@@ -46,6 +46,7 @@ def create_film_lists():
 
 
 def create_content_dict():
+    """Iterate through content db and create dict keyed by trigger"""
     for film in content_film_list:
         if 'trigger' in film:
             trigger = film['trigger']
@@ -75,7 +76,7 @@ def main():
                 continue
             trans1_film = choice(transition_film_list)
             trans2_film = choice(transition_film_list)
-            loop = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
+            content = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
 
     except KeyboardInterrupt:
         print ""
