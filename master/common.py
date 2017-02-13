@@ -6,6 +6,7 @@ Copyright: 2017, MIT"""
 # -*- coding: iso-8859-15 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
+from time import sleep, time
 
 #
 # Globals
