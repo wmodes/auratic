@@ -13,6 +13,8 @@ int rfidLen = 41;
 int rfidByteCount = 14;
 int rfidCount = 3;
 
+char savedId[rfidLen];
+
 String reqId = "id";
 String rspId = "id:rfid";
 String reqStatus = "status";
@@ -57,7 +59,7 @@ void doTheThings()
     // create a string array to put our full RFID
     char fullId[rfidLen];
     fullId[0] = '\0';
-    // Yes! Great, let's get 14 of them
+    // let's get 14 of them
     for(int i = 0; i < rfidByteCount; i++) {
       // read new digit
       int digit = RFID.read();
@@ -77,10 +79,18 @@ void doTheThings()
       }
       delay(10);
     }
+    // Is this the same ID we got last time?
+    if (fullId == savedId) {
+      //TODO: check timer
+      break;
+    }
     // We send three times to guard against serial data loss
     for(int i = 0; i < rfidCount; i++) {
       Serial.println(fullId);
     }
+    // Okay, now we do a few things to make sure we don't rapid fire ids
+    RFID.flush();
+    savedId = fullId;
     digitalWrite(led, HIGH);
     delay(250);
     digitalWrite(led, LOW);
