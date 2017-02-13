@@ -15,7 +15,7 @@ from video import *
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
     # get trigger
-    trigger = data["trigger"]
+    trigger = data["key"]
     if trigger in content_film_dict:
         content_film = choice(content_film_dict[trigger])
     else:
