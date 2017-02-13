@@ -10,13 +10,11 @@ from random import choice
 import threading
 import os
 from subprocess import call
+
 # local modules
 import videothread
 from video_db import *
-
-#
-# Constants
-#
+from common import *
 
 
 #
