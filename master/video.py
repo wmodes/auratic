@@ -59,12 +59,17 @@ def create_content_dict():
                 # otherwise, append film to the existing list
                 content_film_dict[trigger_value].append(film)
 
+#
+# Control
+#
+
+
 def main():
     create_film_lists()
     create_content_dict()
     try:
         loop_film = choice(loop_film_list)
-        loop = videothread.VideoThread([loop_film], debug=1)
+        loop_thread = videothread.VideoThread([loop_film], debug=1)
 
         while True:
             max_content = len(content_film_list)-1
@@ -80,7 +85,7 @@ def main():
                 continue
             trans1_film = choice(transition_film_list)
             trans2_film = choice(transition_film_list)
-            content = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
+            content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
 
     except KeyboardInterrupt:
         print ""

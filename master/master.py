@@ -11,9 +11,15 @@ from common import *
 from devices import *
 from video import *
 
+#
+# Globals
+#
+
+old_video_thread = None
 
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
+    global old_content_thread
     # get trigger
     trigger = data["key"]
     if trigger in content_film_dict:
@@ -24,11 +30,17 @@ def trigger_actions(data):
     duration = content_film['length']
     # start chart recorder
     start_chart(duration)
+    # kill old film if necessary
+    try:
+        old_content_thread.stop()
+    except:
+        pass
     # start films
     trans1_film = choice(transition_film_list)
     trans2_film = choice(transition_film_list)
-    content = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
-    content.start()
+    content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
+    content_thread.start()
+    old_video_thread = content_thread
 
 
 def main():
@@ -38,8 +50,8 @@ def main():
 
     report("starting idle video")
     loop_film = choice(loop_film_list)
-    loop = videothread.VideoThread([loop_film], debug=1)
-    loop.start()
+    loop_thread = videothread.VideoThread([loop_film], debug=1)
+    loop_thread.start()
 
     report("Setting up serial devices")
     setup_serial()
