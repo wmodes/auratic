@@ -28,6 +28,7 @@ def trigger_actions(data):
     trans1_film = choice(transition_film_list)
     trans2_film = choice(transition_film_list)
     content = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
+    content.start()
 
 
 def main():
@@ -38,6 +39,7 @@ def main():
     report("starting idle video")
     loop_film = choice(loop_film_list)
     loop = videothread.VideoThread([loop_film], debug=1)
+    loop.start()
 
     report("Setting up serial devices")
     setup_serial()

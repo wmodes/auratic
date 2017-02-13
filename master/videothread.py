@@ -177,7 +177,8 @@ def main():
     video = VideoThread([films[1], films[3], films[2]], debug=2)
     video.start()
     print "Sequence started"
-    time.sleep(5)
+    raw_input("Press enter to kill video")
+    video.stop()
 
 if __name__ == "__main__":
     main()
