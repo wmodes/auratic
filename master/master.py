@@ -28,6 +28,7 @@ def trigger_actions(data):
     trans2_film = choice(transition_film_list)
     content = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
 
+
 def main():
     report("Reading film database")
     create_film_lists()
