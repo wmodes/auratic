@@ -169,7 +169,7 @@ def main():
             'file': "media/1960s-baltimore-family.mp4",
             'type': 'content',
             'start': 0.0,
-            'length': 5.0,
+            'length': 10.0,
             'layer': 5,
          },
         ]
