@@ -49,6 +49,9 @@ class VideoThread(threading.Thread):
         self._current_video = None
         self._player_pgid = None
 
+    def set_sequence(self, playlist=None):
+        self.playlist = playlist
+
     def stop(self):
         self.__debug_("Stop flag set")
         self._stop.set()
@@ -171,10 +174,10 @@ def main():
          },
         ]
     print "Starting sequence"
-    video = VideoThread(debug=2)
-    video.start_sequence([films[1], films[3], films[2]])
+    video = VideoThread([films[1], films[3], films[2]], debug=2)
+    video.start()
     print "Sequence started"
-    time.sleep(2)
+    time.sleep(5)
 
 if __name__ == "__main__":
     main()
