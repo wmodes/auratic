@@ -11,7 +11,7 @@ from time import sleep, time
 #
 # Constants
 #
-DEBUG = 1 
+DEBUG = 0
 
 #
 # Globals
