@@ -42,7 +42,7 @@ def debug(text, level):
         # if now is greater than our last debug time + an interval
         if (text not in last_debug_time or
                 time() > last_debug_time[text] + debug_interval):
-            report("DEBUG: " + text)
+            report("debug: " + text)
             last_debug_time[text] = time()
 
 
