@@ -103,6 +103,7 @@ films = [
             'start': 0.0,
             'length': 45.0,
             'layer': 5,
+            'trigger': 'hair',
          },
         {'name': "1960s-baltimore-family",
             'file': "../media/1960s-baltimore-family.mp4",
