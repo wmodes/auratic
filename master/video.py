@@ -45,13 +45,19 @@ def create_film_lists():
 
 def create_content_dict():
     """Iterate through content db and create dict keyed by trigger"""
+    # look through all films in the content list
     for film in content_film_list:
+        # if a film has a trigger key
         if 'trigger' in film:
-            trigger = film['trigger']
-            if trigger not in content_film_dict:
-                content_film_dict[trigger] = [film]
+            # get the film's trigger value
+            trigger_value = film['trigger']
+            # if we have not already created an entry for this trigger_value
+            if trigger_value not in content_film_dict:
+                # create a new list entry in the content dictionary with key trigger
+                content_film_dict[trigger_value] = [film]
             else:
-                content_film_dict[trigger].append(film)
+                # otherwise, append film to the existing list
+                content_film_dict[trigger_value].append(film)
 
 def main():
     create_film_lists()

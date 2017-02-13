@@ -19,8 +19,8 @@ def trigger_actions(data):
     if trigger in content_film_dict:
         content_film = choice(content_film_dict[trigger])
     else:
-        content_film = content_film_dict['default']
-    duration = content_film["length"]
+        content_film = choice(content_film_dict['default'])
+    duration = content_film['length']
     # start chart recorder
     start_chart(duration)
     # start films
