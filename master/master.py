@@ -20,6 +20,7 @@ def trigger_actions(data):
         content_film = choice(content_film_dict[trigger])
     else:
         content_film = choice(content_film_dict['default'])
+    debug('Content:', content_film)
     duration = content_film['length']
     # start chart recorder
     start_chart(duration)
