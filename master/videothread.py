@@ -43,12 +43,11 @@ class VideoThread(threading.Thread):
     def __init__(self, playlist=None, debug=0):
         super(VideoThread, self).__init__()
         self._stop = threading.Event()
+        self.playlist = playlist
         self._debug = debug
         self._last_debug_caller = None
         self._current_video = None
         self._player_pgid = None
-        if playlist:
-            self.start_sequence(playlist)
 
     def stop(self):
         self.__debug_("Stop flag set")
@@ -78,7 +77,7 @@ class VideoThread(threading.Thread):
             # save last calling function
             self._last_debug_caller = caller
 
-    def start_sequence(self, playlist):
+    def run(self, playlist):
         if not isinstance(playlist, list):
             raise ValueError(self._example)
         for video in playlist:
@@ -143,28 +142,28 @@ class VideoThread(threading.Thread):
 def main():
     films = [
         {'name': "idle_2",
-            'file': "../media/idle_2.mp4",
+            'file': "media/idle_2.mp4",
             'type': 'loop',
             'start': 0.0,
             'length': 0.0,
             'layer': 1,
          },
         {'name': "tv-color-bars-distorted",
-            'file': "../media/tv-color-bars-distorted.mp4",
+            'file': "media/tv-color-bars-distorted.mp4",
             'type': 'transition',
             'start': 0.0,
             'length': 1.0,
             'layer': 9,
          },
         {'name': "tv-static-transition",
-            'file': "../media/tv-static-transition.mp4",
+            'file': "media/tv-static-transition.mp4",
             'type': 'transition',
             'start': 0.0,
             'length': 1.0,
             'layer': 9,
          },
         {'name': "1960s-baltimore-family",
-            'file': "../media/1960s-baltimore-family.mp4",
+            'file': "media/1960s-baltimore-family.mp4",
             'type': 'content',
             'start': 0.0,
             'length': 5.0,
