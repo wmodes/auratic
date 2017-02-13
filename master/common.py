@@ -9,6 +9,11 @@ Copyright: 2017, MIT"""
 from time import sleep, time
 
 #
+# Constants
+#
+DEBUG = 1 
+
+#
 # Globals
 #
 
