@@ -1,6 +1,11 @@
 #!/usr/bin/python
+"""video.py: play and manage threaded video as needed
+Author: Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
+Copyright: 2017, MIT """
+
 # -*- coding: iso-8859-15 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+
 from random import choice
 import threading
 import os
@@ -9,17 +14,11 @@ from subprocess import call
 import videothread
 from video_db import *
 
-"""video.py: play and manage threaded video as needed"""
-__author__ = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
-__copyright__ = "2017, MIT"
-
-
 #
 # Constants
 #
 
 DEBUG = True
-inter_video_delay = 0.75
 
 #
 # Globals
