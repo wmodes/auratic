@@ -80,10 +80,10 @@ class VideoThread(threading.Thread):
             # save last calling function
             self._last_debug_caller = caller
 
-    def run(self, playlist):
-        if not isinstance(playlist, list):
+    def run(self):
+        if not isinstance(self.playlist, list):
             raise ValueError(self._example)
-        for video in playlist:
+        for video in self.playlist:
             if not self.stopped():
                 self.__debug_("Starting:", video['name'])
                 self.__start_video__(video)
