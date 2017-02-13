@@ -19,7 +19,7 @@ from common import *
 
 # Constants
 #
-DEBUG = 1
+DEBUG = 0
 USB_PORT_PREFIX = "/dev/ttyUSB"
 MAX_USB_PORTS = 12
 RFID_SEND_COUNT = 3
@@ -84,6 +84,7 @@ chart_timer = ""
 def sorted_devices():
     """Return list of devices sorted by sort order values in devices dictionary"""
     return sorted(devices.values(), key=lambda x: x['sort'])
+
 
 def is_port_active(port):
     """Check if given port is active.

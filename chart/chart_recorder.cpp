@@ -9,7 +9,7 @@ using namespace std;
 
 // CONSTANTS
 
-const bool IDLESWEEP = true;
+const bool IDLESWEEP = false;
 
 const int PENMIN = 70;       // minimum alloable rotation of servo
 const int PENMAX = 120;     // maximam allowable rotation of servo

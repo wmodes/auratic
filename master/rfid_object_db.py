@@ -34,7 +34,7 @@ object_db = {
         'title': 'Picture of Saints',
         'key':  'saints',
     },
-    '02:51:48:48:48:51:55:51:49:65:57:57:70:03:3': {
+    '02:52:69:48:48:65:70:70:54:57:48:56:55:03:3': {
         'title': 'Doorknob',
         'key':  'doorknob',
     },
