@@ -33,7 +33,7 @@ def trigger_actions(data):
     # kill old film if necessary
     # try:
     while old_video_threads:
-        thread = pop(old_video_threads)
+        thread = old_video_threads.pop()
         thread.stop()
     # except:
     #     pass
