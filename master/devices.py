@@ -133,7 +133,7 @@ def request_id_from_device(port):
     return ""
 
 
-def setup_serial():
+def setup_devices():
     """Set up all of our serial ports connected to our devices"""
     # report("Checking for active ports")
     try:
@@ -141,11 +141,11 @@ def setup_serial():
         # First we assign all of our fixed port devices
         for device in sorted_devices():
             if (device['port-status'] == 'fixed' and device['status'] != 'live'):
-                debug("setup_serial(): Unassigned device: " + device['name'], 1)
+                debug("setup_devices(): Unassigned device: " + device['name'], 1)
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                             device['id'], device['port']))
-                # asign a serial handle
-                device['handle'] = serial.Serial(device['port'], 9600, timeout=.5)
+                # asign a handle
+                device['handle'] = InputDevice(device['port'])
                 # add port to our assigned port list
                 if port not in assigned_ports:
                     assigned_ports.append(device['port'])
@@ -153,20 +153,20 @@ def setup_serial():
                 device['status'] = 'live'
         # Now we assign all of our variable port devices
         for port in usb_ports:
-            debug("setup_serial(): Active ports: " + str(usb_ports), 1)
-            debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
+            debug("setup_devices(): Active ports: " + str(usb_ports), 1)
+            debug("setup_devices(): Registered ports: " + str(assigned_ports), 1)
             # if this port isn't already assigned
             if (port not in assigned_ports):
-                debug("setup_serial(): Unassigned port: " + port, 1)
+                debug("setup_devices(): Unassigned port: " + port, 1)
                 #
                 # look through our list of expected devices
                 for device in sorted_devices():
                     # if the device is not fixed port and not already live
                     if (device['port-status'] != 'fixed' and not is_port_active(device['port'])):
-                        debug("setup_serial(): Unassigned device: " + device['name'], 1)
+                        debug("setup_devices(): Unassigned device: " + device['name'], 1)
                         # if device IDs as this device
                         response = request_id_from_device(port)
-                        debug("setup_serial(): Response: " + response, 1)
+                        debug("setup_devices(): Response: " + response, 1)
                         if (device['id'] in response):
                             report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                                         response, port))
@@ -186,7 +186,7 @@ def setup_serial():
     except IOError:
         report("WARNING: Setup error, retrying")
         sleep(1)
-        setup_serial()
+        setup_devices()
 
 
 def all_devices_live():
@@ -330,12 +330,12 @@ def listen_and_report():
 
 
 def main():
-    setup_serial()
+    setup_devices()
     # This is our main loop that listens and responds
     while 1:
         # check if all of our devices are active
         if not all_devices_live():
-            setup_serial()
+            setup_devices()
         # let's take actions if we can
         if all_critical_devices_live():
             listen_and_report()
