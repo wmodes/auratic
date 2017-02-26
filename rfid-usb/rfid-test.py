@@ -14,10 +14,17 @@ dev = InputDevice(DEVICE)
 #         if event.type==1 and event.value==1:
 #                 print( keys[ event.code ] )
 
+id = ''
 while True:
     r,w,x = select([dev], [], [])
-    event = dev.read_one()
-    if event.type==1 and event.value==1:
+    for event in dev.read():
+        if event.type==1 and event.value==1:
+            key = keys[event.code]
+            if key != 'X':
+                id += "%02d:" % int(key)
+            else
+                print "ID:", id
+                id = ""
             print( keys[ event.code ] )
 
 
