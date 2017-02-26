@@ -19,7 +19,7 @@ from common import *
 
 # Constants
 #
-DEBUG = 0
+DEBUG = 2
 USB_PORT_PREFIX = "/dev/ttyUSB"
 MAX_USB_PORTS = 12
 RFID_SEND_COUNT = 3
@@ -50,7 +50,8 @@ devices = {'rfid': {'key':      'rfid',
                     'id':       'id:rfid',
                     'fault':    'critical',
                     'status':   'init',
-                    'port':     '',
+                    'port':     '/dev/input/by-id/usb-Sycreader_RFID_Technology_Co.__Ltd_SYC_ID_IC_USB_Reader_08FF20140315-event-kbd',
+                    'port-status': 'fixed',
                     'sort':     1
                     },
            'chart1': {'key':     'chart1',
@@ -59,6 +60,7 @@ devices = {'rfid': {'key':      'rfid',
                       'fault':    'warn',
                       'status':   'init',
                       'port':     '',
+                      'port-status': 'variable',
                       'sort':     2
                       },
            'chart2': {'key':      'chart2',
@@ -67,6 +69,7 @@ devices = {'rfid': {'key':      'rfid',
                       'fault':    'silent',
                       'status':   'init',
                       'port':     '',
+                      'port-status': 'variable',
                       'sort':     3
                       }
            }
@@ -135,24 +138,32 @@ def setup_serial():
     # report("Checking for active ports")
     try:
         usb_ports = get_active_usb_ports()
-        # pause a moment to make sure system has set up the serial ports we've found
-        # sleep(1)        # needed?
-        if not usb_ports:
-            update("ERROR: No active devices found")
+        # First we assign all of our fixed port devices
+        for device in sorted_devices():
+            if (device['port-status'] == 'fixed' and not is_port_active(device['port'])):
+                debug("setup_serial(): Unassigned device: " + device['name'], 1)
+                report("Setting up %s, ID: %s, Port: %s" % (device['name'],
+                                                            response, port))
+                # asign a serial handle
+                device['handle'] = serial.Serial(port, 9600, timeout=.5)
+                # add port to our assigned port list
+                if port not in assigned_ports:
+                    assigned_ports.append(port)
+                # mark is as currently live
+                device['status'] = 'live'
+        # Now we assign all of our variable port devices
         for port in usb_ports:
             debug("setup_serial(): Active ports: " + str(usb_ports), 1)
-            debug(
-                "setup_serial(): Registered ports: " + str(assigned_ports), 1)
+            debug("setup_serial(): Registered ports: " + str(assigned_ports), 1)
             # if this port isn't already assigned
             if (port not in assigned_ports):
                 debug("setup_serial(): Unassigned port: " + port, 1)
                 #
                 # look through our list of expected devices
                 for device in sorted_devices():
-                    # if the device is not already live and
-                    if (not is_port_active(device['port'])):
-                        debug(
-                            "setup_serial(): Unassigned device: " + device['name'], 1)
+                    # if the device is not fixed port and not already live
+                    if (device['port-status'] != 'fixed' and not is_port_active(device['port'])):
+                        debug("setup_serial(): Unassigned device: " + device['name'], 1)
                         # if device IDs as this device
                         response = request_id_from_device(port)
                         debug("setup_serial(): Response: " + response, 1)
@@ -160,8 +171,7 @@ def setup_serial():
                             report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                                         response, port))
                             # asign a serial handle
-                            device['handle'] = serial.Serial(
-                                port, 9600, timeout=.5)
+                            device['handle'] = serial.Serial(port, 9600, timeout=.5)
                             # assign the port name
                             device['port'] = port
                             # add port to our assigned port list
@@ -191,19 +201,20 @@ def all_devices_live():
         # is_port_active() returns False
         if not is_port_active(device['port']):
             # devices['chart']['live'] = False
-            if (device['fault'] == "critical"):
+            if (device['fault'] == 'critical'):
                 # at intervals we report this
                 update("CRITICAL: %s disconnected." % device['name'])
-            elif (device['fault'] == "warn"):
+            elif (device['fault'] == 'warn'):
                 # at intervals we report this
                 update("WARNING: %s disconnected." % device['name'])
             # set status for this device
             device['status'] == 'missing'
             # unassign port
-            device['port'] == ''
-            # remove port from our assigned port list
-            if device['port'] in assigned_ports:
-                assigned_ports.remove(device['port'])
+            if device['port-status'] != "fixed":
+                device['port'] == ''
+                # remove port from our assigned port list
+                if device['port'] in assigned_ports:
+                    assigned_ports.remove(device['port'])
             devices_ok = False
     return devices_ok
 

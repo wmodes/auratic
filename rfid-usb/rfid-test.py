@@ -13,3 +13,4 @@ while True:
    for event in dev.read():
         if event.type==1 and event.value==1:
                 print( keys[ event.code ] )
+
