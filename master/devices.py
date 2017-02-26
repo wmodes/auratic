@@ -307,7 +307,7 @@ def stop_chart():
 def listen_and_report():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
-    global rfid_in
+    global rfid_injj
     result = None 
     rfid_good = None   
     try:
@@ -320,6 +320,7 @@ def listen_and_report():
                 if key != scancodes[26]:
                     if key.isdigit():
                         rfid_in += "%02d:" % int(key)
+                    debug("Key: %s ID: %s" % (key, rfid_in), 1)
                 else:
                     rfid_in = id[0:-1]
                     # if the rfid has the proper length,
@@ -336,7 +337,7 @@ def listen_and_report():
         # clear incoming buffer in case we have stuff waiting
         # rfid_device.reset_input_buffer()
         # rfid_device.flushInput()
-        report("Continue listening for RFID")
+        #report("Continue listening for RFID")
         # # do we have data on the input buffer waiting
         # if rfid_device.in_waiting > 0:
         #     # if we send the same rfid multiple times
