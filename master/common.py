@@ -42,7 +42,7 @@ def report(*args):
 def debug(*args, **kargs):
     """Produce debug message, indenting if from same calling function"""
     global debug_last_caller
-    if level in kargs:
+    if 'level' in kargs:
         level = kargs['level']
     else:
         level = 1
