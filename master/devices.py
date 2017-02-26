@@ -312,8 +312,8 @@ def listen_and_report():
     try:
         update("Listening for RFID")
         rfid_device = devices['rfid']['handle']
-        r,w,x = select([dev], [], [])
-        for event in dev.read():
+        r,w,x = select([rfid_device], [], [])
+        for event in rfid_device.read():
             if event.type == 1 and event.value == 1:
                 key = scancodes[event.code]
                 if key != scancodes[26]:
