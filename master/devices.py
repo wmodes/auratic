@@ -155,7 +155,7 @@ def setup_devices():
         # First we assign all of our fixed port devices
         for device in sorted_devices():
             if (device['port-status'] == 'fixed' and device['status'] != 'live'):
-                debug("setup_devices(): Unassigned device: " + device['name'], 1)
+                debug("Unassigned device:", device['name'])
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                             device['id'], device['port']))
                 # asign a handle
@@ -167,20 +167,20 @@ def setup_devices():
                 device['status'] = 'live'
         # Now we assign all of our variable port devices
         for port in usb_ports:
-            debug("setup_devices(): Active ports: " + str(usb_ports), 1)
-            debug("setup_devices(): Registered ports: " + str(assigned_ports), 1)
+            debug("Active ports:", str(usb_ports))
+            debug("Registered ports:", str(assigned_ports))
             # if this port isn't already assigned
             if (port not in assigned_ports):
-                debug("setup_devices(): Unassigned port: " + port, 1)
+                debug("Unassigned port:", port)
                 #
                 # look through our list of expected devices
                 for device in sorted_devices():
                     # if the device is not fixed port and not already live
                     if (device['port-status'] != 'fixed' and not is_port_active(device['port'])):
-                        debug("setup_devices(): Unassigned device: " + device['name'], 1)
+                        debug("Unassigned device:", device['name'])
                         # if device IDs as this device
                         response = request_id_from_device(port)
-                        debug("setup_devices(): Response: " + response, 1)
+                        debug("Response: ", response)
                         if (device['id'] in response):
                             report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                                         response, port))
@@ -320,7 +320,7 @@ def listen_and_report():
                 if key != scancodes[26]:
                     if key.isdigit():
                         rfid_in += "%02d:" % int(key)
-                    debug("Key: %s ID: %s" % (key, rfid_in), 1)
+                    debug("Key: %s ID: %s" % (key, rfid_in))
                 else:
                     rfid_in = id[0:-1]
                     # if the rfid has the proper length,
