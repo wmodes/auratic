@@ -34,7 +34,8 @@ while True:
             if key != '\n':
                 id += "%02d:" % int(key)
             else:
-                print "event code:", event.code, "ID:", id
+                id = id[0:-1]
+                print "ID:", id
                 id = ""
             print(key)
 
