@@ -319,7 +319,7 @@ def listen_and_report():
                 if key != 'CRLF':
                     if key.isdigit():
                         rfid_in += "%02d:" % int(key)
-                    debug("Key: %s ID: %s" % (key, rfid_in))
+                    debug("Key: %s ID: %s" % (key, rfid_in), level=2)
                 else:
                     rfid_in = rfid_in[0:-1]
                     debug("Full id received: %s" % (rfid_in))
