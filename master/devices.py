@@ -145,10 +145,10 @@ def setup_serial():
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                             device['id'], device['port']))
                 # asign a serial handle
-                device['handle'] = serial.Serial(port, 9600, timeout=.5)
+                device['handle'] = serial.Serial(device['port'], 9600, timeout=.5)
                 # add port to our assigned port list
                 if port not in assigned_ports:
-                    assigned_ports.append(port)
+                    assigned_ports.append(device['port'])
                 # mark is as currently live
                 device['status'] = 'live'
         # Now we assign all of our variable port devices
