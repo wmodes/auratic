@@ -8,8 +8,9 @@ DEVICE = "/dev/input/by-id/usb-Sycreader_RFID_Technology_Co.__Ltd_SYC_ID_IC_USB_
 keys = "X^1234567890XXXXqwertzuiopXXXXasdfghjklXXXXXyxcvbnmXXXXXXXXXXXXXXXXXXXXXXX"
 dev = InputDevice(DEVICE)
 
-r,w,x = select([dev], [], [])
 while True:
+   r,w,x = select([dev], [], [])
+   print "\nNew Event:"
    for event in dev.read():
         if event.type==1 and event.value==1:
                 print( keys[ event.code ] )
