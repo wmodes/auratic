@@ -143,7 +143,7 @@ def setup_serial():
             if (device['port-status'] == 'fixed' and device['status'] != 'live'):
                 debug("setup_serial(): Unassigned device: " + device['name'], 1)
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
-                                                            response, port))
+                                                            device['id'], port))
                 # asign a serial handle
                 device['handle'] = serial.Serial(port, 9600, timeout=.5)
                 # add port to our assigned port list
