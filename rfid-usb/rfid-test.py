@@ -34,7 +34,7 @@ while True:
             if not key:
                 id += "%02d:" % int(key)
             else:
-                print "ID:", id
+                print "event code:", event.code, "ID:", id
                 id = ""
             print( keys[ event.code ] )
 
