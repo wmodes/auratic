@@ -148,7 +148,7 @@ def setup_devices():
                 # asign a handle
                 device['handle'] = InputDevice(device['port'])
                 # add port to our assigned port list
-                if port not in assigned_ports:
+                if device['port'] not in assigned_ports:
                     assigned_ports.append(device['port'])
                 # mark is as currently live
                 device['status'] = 'live'
