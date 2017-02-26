@@ -36,7 +36,7 @@ while True:
             else:
                 print "event code:", event.code, "ID:", id
                 id = ""
-            print( keys[ event.code ] )
+            print(key)
 
 
 # while True:
