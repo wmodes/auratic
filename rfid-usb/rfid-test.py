@@ -22,7 +22,7 @@ while True:
             key = keys[event.code]
             if key != 'X':
                 id += "%02d:" % int(key)
-            else
+            else:
                 print "ID:", id
                 id = ""
             print( keys[ event.code ] )
