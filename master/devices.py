@@ -140,7 +140,7 @@ def setup_serial():
         usb_ports = get_active_usb_ports()
         # First we assign all of our fixed port devices
         for device in sorted_devices():
-            if (device['port-status'] == 'fixed' and not is_port_active(device['port'])):
+            if (device['port-status'] == 'fixed' and device['status'] != 'live'):
                 debug("setup_serial(): Unassigned device: " + device['name'], 1)
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                             response, port))
