@@ -3,8 +3,10 @@ import string
 from evdev import InputDevice
 from select import select
 
+DEVICE = "/dev/input/by-id/usb-Sycreader_RFID_Technology_Co.__Ltd_SYC_ID_IC_USB_Reader_08FF20140315-event-kbd"
+
 keys = "X^1234567890XXXXqwertzuiopXXXXasdfghjklXXXXXyxcvbnmXXXXXXXXXXXXXXXXXXXXXXX"
-dev = InputDevice('/dev/input/by-id/usb-HID_OMNIKEY_5127_CK_01010053423438303000835748112531-event-kbd')
+dev = InputDevice(DEVICE)
 
 while True:
    r,w,x = select([dev], [], [])
