@@ -321,7 +321,7 @@ def listen_and_report():
                         rfid_in += "%02d:" % int(key)
                     debug("Key: %s ID: %s" % (key, rfid_in))
                 else:
-                    rfid_in = id[0:-1]
+                    rfid_in = rfid_in[0:-1]
                     debug("Full id received: %s" % (rfid_in))
                     # if the rfid has the proper length,
                     # we can trust it
