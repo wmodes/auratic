@@ -9,15 +9,22 @@ keys = "X^1234567890XXXXqwertzuiopXXXXasdfghjklXXXXXyxcvbnmXXXXXXXXXXXXXXXXXXXXX
 dev = InputDevice(DEVICE)
 
 while True:
-    r,w,x = select([dev], [], [])
-    #print "\nNew event.\n"
-    id = ""
-    key = ""
-    while (key != 'X'):
-        event = dev.read_one()
+   r,w,x = select([dev], [], [])
+   for event in dev.read():
         if event.type==1 and event.value==1:
-            key = keys[ event.code ]
-            print key
-            id += "%02d:" % int(key)
-    print id
+                print( keys[ event.code ] )
+
+# while True:
+#     r,w,x = select([dev], [], [])
+#     #print "\nNew event.\n"
+#     id = ""
+#     key = ""
+#     while (key != 'X'):
+#         for event in dev.read():
+#         event = dev.read_one()
+#         if event.type==1 and event.value==1:
+#             key = keys[ event.code ]
+#             print key
+#             id += "%02d:" % int(key)
+#     print id
 
