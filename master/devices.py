@@ -316,13 +316,13 @@ def listen_and_report():
         for event in rfid_device.read():
             if event.type == 1 and event.value == 1:
                 key = scancodes[event.code]
-                print "key:", key, "id:", rfid_in
                 if key != scancodes[26]:
                     if key.isdigit():
                         rfid_in += "%02d:" % int(key)
                     debug("Key: %s ID: %s" % (key, rfid_in))
                 else:
                     rfid_in = id[0:-1]
+                    debug("Full id received: %s" % (rfid_in))
                     # if the rfid has the proper length,
                     # we can trust it
                     if len(rfid_in) == RFID_LENGTH:
