@@ -14,7 +14,6 @@ from video import *
 #
 # Globals
 #
-
 old_video_threads = []
 
 def trigger_actions(data):

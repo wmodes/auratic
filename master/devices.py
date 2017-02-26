@@ -21,7 +21,6 @@ from common import *
 
 # Constants
 #
-DEBUG = 2
 USB_PORT_PREFIX = "/dev/ttyUSB"
 MAX_USB_PORTS = 12
 RFID_SEND_COUNT = 3
