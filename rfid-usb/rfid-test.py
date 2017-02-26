@@ -37,8 +37,6 @@ while True:
                 id = id[0:-1]
                 print "ID:", id
                 id = ""
-            print(key)
-
 
 # while True:
 #     r,w,x = select([dev], [], [])
