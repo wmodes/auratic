@@ -307,6 +307,7 @@ def stop_chart():
 def listen_and_report():
     """Do our main loop actions, particularly listening to the
     RFID reader and triggering actions"""
+    global rfid_in
     result = None 
     rfid_good = None   
     try:
