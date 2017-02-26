@@ -13,7 +13,7 @@ int rfidLen = 41;
 int rfidByteCount = 14;
 int rfidCount = 3;
 unsigned long sameIdWaitTime = 30000;
-int delayBetweenReads = 1000;
+int delayBetweenReads = 100;
 int debug = 0;
 
 String savedId = "";
