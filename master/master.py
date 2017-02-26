@@ -56,12 +56,12 @@ def main():
     loop_thread.start()
 
     report("Setting up serial devices")
-    setup_serial()
+    setup_devices()
     # This is our main loop that listens and responds
     while 1:
         # check if all of our devices are active
         if not all_devices_live():
-            setup_serial()
+            setup_devices()
         # let's take actions if we can
         if all_critical_devices_live():
             object_data = listen_and_report()
