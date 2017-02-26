@@ -7,6 +7,7 @@ Copyright: 2017, MIT"""
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 from time import sleep, time
+import sys
 
 #
 # Constants
@@ -28,7 +29,8 @@ report_interval = 5
 last_debug_time = {}
 # report interval in seconds
 debug_interval = 1
-
+# last function that called debug
+debug_last_caller = ""
 
 def report(*args):
     """immediately report information.
@@ -37,7 +39,28 @@ def report(*args):
     print text
 
 
-def debug(text, level):
+def debug(*args, **kargs):
+    """Produce debug message, indenting if from same calling function"""
+    global debug_last_caller
+    if level in kargs:
+        level = kargs['level']
+    else:
+        level = 1
+    if (level <= DEBUG):
+        text = " ".join(list(map(str, args)))
+        caller = sys._getframe(1).f_code.co_name
+        # if now is greater than our last debug time + an interval
+        if (text not in last_debug_time or
+                time() > last_debug_time[text] + debug_interval):
+            if (caller == debug_last_caller):
+                report("    debug: %s: %s" % (caller, text))
+            else:
+                report("debug: %s: %s" % (caller, text))
+            last_debug_time[text] = time()
+        debug_last_caller = caller
+
+
+def debug(text, level=1):
     if (DEBUG >= level):
         # if now is greater than our last debug time + an interval
         if (text not in last_debug_time or
