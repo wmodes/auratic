@@ -315,8 +315,9 @@ def listen_and_report():
         r,w,x = select([rfid_device], [], [])
         for event in rfid_device.read():
             if event.type == 1 and event.value == 1:
-                key = scancodes[event.code]
-                if key != scancodes[26]:
+                scancode = event.code
+                if scancode != 26:
+                    key = scancodes[scancode]
                     if key.isdigit():
                         rfid_in += "%02d:" % int(key)
                     debug("Key: %s ID: %s" % (key, rfid_in))
