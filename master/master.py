@@ -48,6 +48,7 @@ def main():
     report("Reading film database")
     global film_db
     film_db = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
+    debug(film_db)
     create_film_lists()
     create_content_dict()
 
