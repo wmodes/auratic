@@ -55,7 +55,7 @@ def trigger_actions(object_data, transition_list, content_dict):
     trans1_film = choice(transition_list)
     trans2_film = choice(transition_list)
     content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film],
-                                             media_dir=MEDIA_BASE, debug=1)
+                                             media_dir=MEDIA_BASE, debug=DEBUG)
     content_thread.start()
     old_video_threads.append(content_thread)
 
@@ -70,7 +70,7 @@ def main():
 
     report("starting idle video")
     loop_film = choice(film_dict['loop'])
-    loop_thread = videothread.VideoThread([loop_film], media_dir=MEDIA_BASE, debug=1)
+    loop_thread = videothread.VideoThread([loop_film], media_dir=MEDIA_BASE, debug=DEBUG)
     loop_thread.start()
 
     report("Setting up serial devices")
