@@ -15,18 +15,27 @@ from video import *
 # Globals
 #
 old_video_threads = []
-film_db = []
+# A list of film records 
+# (each record of which is a film dict)
+film_list = []
+# A dictionary of lists of films, indexed by type 
+# (each record of which is a film dict)
+film_dict = {}
+# A dictionary of content types, indexed by trigger
+# (each record of which is a film dict)
+content_dict = {}
 
-def trigger_actions(data):
+def trigger_actions(object_data, content_dict):
     """Trigger all of the actions specified by the database"""
     global old_content_thread
     # get trigger
-    trigger = data["key"]
-    if trigger in content_film_dict:
-        content_film = choice(content_film_dict[trigger])
+    trigger = object_data["key"]
+    if trigger in content_dict:
+        content_film = choice(content_dict[trigger])
     else:
-        content_film = choice(content_film_dict['default'])
+        content_film = choice(content_dict['default'])
     debug('Content:', content_film)
+    # TODO: Get actual length of video (steal from video.py)
     duration = content_film['length']
     # start chart recorder
     start_chart(duration)
@@ -47,14 +56,14 @@ def trigger_actions(data):
 
 def main():
     report("Reading film database")
-    global film_db
-    film_db = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
-    debug(film_db)
-    create_film_lists()
-    create_content_dict()
+    film_list = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
+    debug(film_list)
+    film_dict = create_film_dict(film_list)
+    debug(film_dict)
+    content_dict = create_content_dict(film_dict['content'])
 
     report("starting idle video")
-    loop_film = choice(loop_film_list)
+    loop_film = choice(film_dict['loop'])
     loop_thread = videothread.VideoThread([loop_film], debug=1)
     loop_thread.start()
 
@@ -69,7 +78,7 @@ def main():
         if all_critical_devices_live():
             object_data = listen_and_report()
             if object_data:
-                trigger_actions(object_data)
+                trigger_actions(object_data, content_dict)
 
 
 if __name__ == '__main__':

@@ -26,34 +26,19 @@ FILMDB_FILE = 'films.json'
 # Globals
 #
 
-# A list of film records 
-# (each record of which is a film dict)
-film_db = []
-# A dictionary of lists of films, indexed by type 
-# (each record of which is a film dict)
-film_lists = {}
-# A dictionary of content types, indexed by trigger
-# (each record of which is a film dict)
-content_film_dict = {}
+# # A list of film records 
+# # (each record of which is a film dict)
+# film_list = []
+# # A dictionary of lists of films, indexed by type 
+# # (each record of which is a film dict)
+# film_dict = {}
+# # A dictionary of content types, indexed by trigger
+# # (each record of which is a film dict)
+# content_film_dict = {}
 
 #
 # Preparatory
 #
-
-def create_film_lists():
-    """Iterate through imported database and sort list by type"""
-    for film in film_db:
-        if 'disabled' not in film or not film['disabled']:
-            # make lists of film types
-            # Note, that this means a film can be in several lists
-            if 'type' in film:
-                for tag in film['type']:
-                    if tag not in film_lists: 
-                        film_lists[tag] = [film]
-                    else:
-                        film_lists[tag].append(film)
-    debug(film_lists)
-
 
 def read_film_file(filename):
     """Get JSON film file. File """
@@ -63,17 +48,20 @@ def read_film_file(filename):
 # json returns unicode objects, but for our purposes byte format is fine
 # http://stackoverflow.com/questions/956867/how-to-get-string-objects-instead-of-unicode-ones-from-json-in-python
 
+
 def json_load_byteified(file_handle):
     return _byteify(
         json.load(file_handle, object_hook=_byteify),
         ignore_dicts=True
     )
 
+
 def json_loads_byteified(json_text):
     return _byteify(
         json.loads(json_text, object_hook=_byteify),
         ignore_dicts=True
     )
+
 
 def _byteify(data, ignore_dicts = False):
     # if this is a unicode string, return its string representation
@@ -93,21 +81,39 @@ def _byteify(data, ignore_dicts = False):
     return data
 
 
-def create_content_dict():
+def create_film_lists(film_list):
+    """Iterate through imported database and sort list by type"""
+    film_dict = {}
+    for film in film_list:
+        if 'disabled' not in film or not film['disabled']:
+            # make lists of film types
+            # Note, that this means a film can be in several lists
+            if 'type' in film:
+                for tag in film['type']:
+                    if tag not in film_lists: 
+                        film_lists[tag] = [film]
+                    else:
+                        film_lists[tag].append(film)
+    return film_dict
+
+
+def create_content_dict(content_list):
     """Iterate through content db and create dict keyed by trigger"""
     # look through all films in the content list
-    for film in film_lists['content']:
+    content_dict = {}
+    for film in content_list:
         # if a film has a trigger key
         if 'trigger' in film:
             # get the film's trigger value
             trigger_value = film['trigger']
             # if we have not already created an entry for this trigger_value
-            if trigger_value not in content_film_dict:
+            if trigger_value not in content_dict:
                 # create a new list entry in the content dictionary with key trigger
-                content_film_dict[trigger_value] = [film]
+                content_dict[trigger_value] = [film]
             else:
                 # otherwise, append film to the existing list
-                content_film_dict[trigger_value].append(film)
+                content_dict[trigger_value].append(film)
+    return content_dict
 
 #
 # Control
