@@ -150,7 +150,7 @@ class VideoThread(threading.Thread):
                    (time.time() <= start_time + length - INTER_VIDEO_DELAY)):
                 pass
             # If type=loop and length=0, loop forever
-            if (video['type'] != 'loop' and length == 0.0):
+            if (video['type'] == 'loop' and length == 0.0):
                 self._debug("Looping indefinitely for %i (%s)" %
                               (pgid, name))
             # otherwise, kill it
