@@ -46,6 +46,8 @@ def trigger_actions(data):
 
 def main():
     report("Reading film database")
+    global film_db
+    film_db = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
     create_film_lists()
     create_content_dict()
 
