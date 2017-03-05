@@ -90,10 +90,10 @@ def create_film_lists_dict(film_list):
             # Note, that this means a film can be in several lists
             if 'type' in film:
                 for tag in film['type']:
-                    if tag not in film_lists: 
-                        film_lists[tag] = [film]
+                    if tag not in film_dict: 
+                        film_dict[tag] = [film]
                     else:
-                        film_lists[tag].append(film)
+                        film_dict[tag].append(film)
     return film_dict
 
 
