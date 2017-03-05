@@ -81,7 +81,7 @@ def _byteify(data, ignore_dicts = False):
     return data
 
 
-def create_film_lists(film_list):
+def create_film_lists_dict(film_list):
     """Iterate through imported database and sort list by type"""
     film_dict = {}
     for film in film_list:

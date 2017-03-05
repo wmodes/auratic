@@ -58,7 +58,7 @@ def main():
     report("Reading film database")
     film_list = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
     debug(film_list)
-    film_dict = create_film_dict(film_list)
+    film_dict = create_film_lists_dict(film_list)
     debug(film_dict)
     content_dict = create_content_dict(film_dict['content'])
 
