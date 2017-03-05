@@ -57,7 +57,7 @@ class VideoThread(threading.Thread):
         self.playlist = playlist
 
     def stop(self):
-        self.__debug_("Stop flag set")
+        self._debug("Stop flag set")
         self._stop.set()
 
     def stopped(self):
@@ -66,7 +66,7 @@ class VideoThread(threading.Thread):
     def debug(self, debug_flag):
         self._debug = debug_flag
 
-    def __debug_(self, *args, **kwargs):
+    def _debug(self, *args, **kwargs):
         """Produce debug message, indenting if from same calling function"""
         level = 1
         if ("level" in kwargs):
@@ -89,9 +89,9 @@ class VideoThread(threading.Thread):
             raise ValueError(self._example)
         for video in self.playlist:
             if not self.stopped():
-                self.__start_video__(video)
+                self._start_video(video)
 
-    def __start_video__(self, video):
+    def _start_video(self, video):
         """Starts a video. Takes a video object """
         filename = self.media_dir + '/' + video['file']
         if not isinstance(video, dict):
@@ -101,14 +101,14 @@ class VideoThread(threading.Thread):
         else:
             name = video['file']
         if 'disabled' in video and video['disabled']:
-            self.__debug_("not played:", name, "disabled")
+            self._debug("not played:", name, "disabled")
             return
-        self.__debug_("Starting:", name)
+        self._debug("Starting:", name)
         # get length
         if ('length' in video and (video['length'] != 0.0 or video['type'] == 'loop')):
             length = video['length']
         else:
-            length = self.__get_length__(filename)
+            length = self._get_length(filename)
         # get start
         if 'start' in video:
             start = video['start']
@@ -120,8 +120,8 @@ class VideoThread(threading.Thread):
         # store this for later
         self._current_video = video
         # debugging output
-        self.__debug_("name: %s (%s)" % (name, filename))
-        self.__debug_("type: %s, start: %.1fs, end: %.1fs, len: %.1fs" %
+        self._debug("name: %s (%s)" % (name, filename))
+        self._debug("type: %s, start: %.1fs, end: %.1fs, len: %.1fs" %
                       (video['type'], start, start+length, length))
         # construct the player command
         if (video['type'] == 'loop'):
@@ -130,7 +130,7 @@ class VideoThread(threading.Thread):
             my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), filename])
         else: 
             my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), filename])
-        self.__debug_("cmd:", my_cmd, l=2)
+        self._debug("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
         # TODO: after debugging, replace 'if True' with 'try' and enable 'except'
         if True:
@@ -143,7 +143,7 @@ class VideoThread(threading.Thread):
             # save this process group id
             pgid = os.getpgid(proc.pid)
             self._player_pgid = pgid
-            self.__debug_("Starting process: %i (%s)" % (pgid, video['name']))
+            self._debug("Starting process: %i (%s)" % (pgid, video['name']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
             while (not self.stopped() and
@@ -151,28 +151,29 @@ class VideoThread(threading.Thread):
                 pass
             # If type=loop and length=0, loop forever
             if (video['type'] != 'loop' and length == 0.0):
-                self.__debug_("Looping indefinitely for %i (%s)" %
+                self._debug("Looping indefinitely for %i (%s)" %
                               (pgid, name))
             # otherwise, kill it
             else:
-                self.__debug_("setting %.2fs kill timer for %i (%s)" %
+                self._debug("setting %.2fs kill timer for %i (%s)" %
                               (INTER_VIDEO_DELAY, pgid, video['name']))
                 threading.Timer(INTER_VIDEO_DELAY, 
-                                self.__stop_video__, [pgid, video['name']]).start()
+                                self._stop_video_, [pgid, video['name']]).start()
         # except:
-        #     self.__debug_("Unable to start video", name, l=0)
+        #     self._debug("Unable to start video", name, l=0)
 
-    def __stop_video__(self, pgid, name):
+    def _stop_video(self, pgid, name):
         try:
-            self.__debug_("Killing process %i (%s)" % (pgid, name))
+            self._debug("Killing process %i (%s)" % (pgid, name))
             os.killpg(pgid, signal.SIGTERM)
             self._player_pgid = None
             self._current_video = None
         except OSError:
-            self.__debug_("Couldn't terminate %i (%s)" % (pgid, name))
+            self._debug("Couldn't terminate %i (%s)" % (pgid, name))
             pass
 
-    def __get_length__(self, filename):
+    def _get_length(self, filename):
+        debug("Getting duration of %s" % filename)
         return ffprobe.duration(filename)
 
 
