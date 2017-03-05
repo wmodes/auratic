@@ -52,6 +52,7 @@ def create_film_lists():
                         film_lists[tag] = [film]
                     else:
                         film_lists[tag].append(film)
+    debug(film_lists)
 
 
 def read_film_file(filename):
