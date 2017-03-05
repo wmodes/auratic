@@ -1,14 +1,4 @@
 [ 
-  /* Example data:
-  { "name": "sunny-day-loop",             // (optional)
-    "file": "sunny-day-loop.mp4",
-    "type": "loop",                       // value: loop, transition, or content
-    "start": 0.0,                         // (optional) if omitted, assumes 0.0
-    "length": 0.0,                        // (optional) if omitted, assumes duration
-    "disabled": false,                    // (optional) if omitted, assumes false
-    "trigger": "teddybear"
-  },
-  */
   { "file" : "loop-idle1.mp4",
     "type" : "loop"
   },
