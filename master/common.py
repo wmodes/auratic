@@ -13,6 +13,8 @@ import sys
 # Constants
 #
 DEBUG = 2
+MEDIA_BASE = 'media'
+FILMDB_FILE = 'films.json'
 
 #
 # Globals

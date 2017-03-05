@@ -19,8 +19,7 @@ from common import *
 #
 # Constants
 #
-MEDIA_BASE = 'media'
-FILMDB_FILE = 'films.json'
+
 
 #
 # Globals
