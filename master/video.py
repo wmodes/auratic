@@ -127,7 +127,7 @@ def main():
     create_content_dict()
     try:
         loop_film = choice(loop_film_list)
-        loop_thread = videothread.VideoThread([loop_film], debug=1)
+        loop_thread = videothread.VideoThread([loop_film], media_dir=MEDIA_BASE, debug=DEBUG)
 
         while True:
             max_content = len(content_film_list)-1
@@ -143,8 +143,8 @@ def main():
                 continue
             trans1_film = choice(transition_film_list)
             trans2_film = choice(transition_film_list)
-            content_thread = videothread.VideoThread(MEDIA_BASE,
-                    [trans1_film, content_film, trans2_film], debug=1)
+            content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film], 
+                        media_dir=MEDIA_BASE, debug=DEBUG)
 
     except KeyboardInterrupt:
         print ""

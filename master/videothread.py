@@ -41,7 +41,7 @@ class VideoThread(threading.Thread):
              },]
         """
 
-    def __init__(self, media_dir, playlist=None, debug=0):
+    def __init__(self, playlist=None, media_dir=".", debug=0):
         super(VideoThread, self).__init__()
         self._stop = threading.Event()
         self.media_dir = media_dir
