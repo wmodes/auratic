@@ -143,7 +143,7 @@ class VideoThread(threading.Thread):
             # save this process group id
             pgid = os.getpgid(proc.pid)
             self._player_pgid = pgid
-            self._debug("Starting process: %i (%s)" % (pgid, video['name']))
+            self._debug("Starting process: %i (%s)" % (pgid, name))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
             while (not self.stopped() and
@@ -156,9 +156,9 @@ class VideoThread(threading.Thread):
             # otherwise, kill it
             else:
                 self._debug("setting %.2fs kill timer for %i (%s)" %
-                              (INTER_VIDEO_DELAY, pgid, video['name']))
+                              (INTER_VIDEO_DELAY, pgid, name))
                 threading.Timer(INTER_VIDEO_DELAY, 
-                                self._stop_video_, [pgid, video['name']]).start()
+                                self._stop_video_, [pgid, name]).start()
         # except:
         #     self._debug("Unable to start video", name, l=0)
 
