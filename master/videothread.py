@@ -1,17 +1,18 @@
 #!/usr/bin/python
+"""videothread.py: Threaded, stopable video player class
+Author: Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
+Copyright: 2017, MIT """
+
 # -*- coding: iso-8859-15 -*-
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+
 import threading
-from subprocess import Popen, call
+import subprocess
 import sys
 import signal
 import os
 import time
-
-"""videothread.py: Threaded, stopable video player class"""
-__author__ = "Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)"
-__copyright__ = "2017, MIT"
-
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+import ffprobe
 
 INTER_VIDEO_DELAY = 0.75
 
@@ -30,14 +31,14 @@ class VideoThread(threading.Thread):
     _example = """
         The class takes a list containing one or more dictionaries containing
         data about the videos to be played:
-            [{'name': "idle_2",                 # name of the video
-              'file': "../media/idle_2.mp4",    # filename of the file
-              'type': 'loop',                   # video type: loop, transition, or content
-              'start': 0.0,                     # start position in video (sec)
-              'length': 0.0,                    # duration to play (sec)
-              'layer': 1,                       # omxplayer layer on which to display
-              'disabled': False                 # If set, record is ignored
-            }]
+            [{'name': "loop-idle1",         # if omitted, uses 'file'
+                'file': "loop-idle1.mp4",   # looks in 'mediabase' for media
+                'type': 'loop',             # loop, transition, content, etc
+                'start': 0.0,               # if omitted, assumes 0
+                'length': 0.0,              # if omitted, assumes len(filename)
+                'disabled': True,           # if omitted, assumes False
+                'trigger': 'item'           # if type=content, specifies trigger
+             },]
         """
 
     def __init__(self, playlist=None, debug=0):
@@ -85,51 +86,77 @@ class VideoThread(threading.Thread):
             raise ValueError(self._example)
         for video in self.playlist:
             if not self.stopped():
-                self.__debug_("Starting:", video['name'])
                 self.__start_video__(video)
 
+    # TODO: Somehow add MEDIA_BASE to the launch thing
     def __start_video__(self, video):
+        """Starts a video. Takes a video object """
         if not isinstance(video, dict):
             raise ValueError(self._example)
+        if 'name' in video:
+            name = video['name']
+        else:
+            name = video['file']
         if 'disabled' in video and video['disabled']:
-            self.__debug_("not played:", video['name'], "disabled")
+            self.__debug_("not played:", name, "disabled")
             return
+        self.__debug_("Starting:", name)
+        # get length
+        if ('length' in video and (video['length'] != 0.0 or video['type'] == 'loop')):
+            length = video['length']
+        else:
+            length = self.__get_length__(video['file'])
+        # get start
+        if 'start' in video:
+            start = video['start']
+        else:
+            start = 0.0
+        # if start is too large, set it to 0 (unless type=loop)
+        if (video['type'] != 'loop' and start >= length):
+            start = 0.0
+        # store this for later
         self._current_video = video
-        self.__debug_("name: %s (%s)" %  (video['name'], video['file']))
+        # debugging output
+        self.__debug_("name: %s (%s)" % (name, video['file']))
         self.__debug_("type: %s, start: %.1fs, end: %.1fs, len: %.1fs" %
-                      (video['type'], video['start'],
-                       video['start']+video['length'], video['length']))
+                      (video['type'], start, start+length, length))
         # construct the player command
         if (video['type'] == 'loop'):
             my_cmd = " ".join(LOOP_CMD + [video['file']])
         elif (video['type'] == 'transition'):
             my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), video['file']])
-        elif (video['type'] == 'content'):
+        else:
             my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['file']])
         self.__debug_("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
-        # try:
-        if True:
+        # TODO: after debugging, replace 'if True' with 'try' and enable 'except'
+        #if True:
+        try:
             proc = None
             if (self._debug >= 3):
-                proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
+                proc = subprocess.Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
             else:
-                proc = Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
+                proc = subprocess.Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
             # save this process group id
             pgid = os.getpgid(proc.pid)
-            self._player_pgid = pgid 
+            self._player_pgid = pgid
             self.__debug_("Starting process: %i (%s)" % (pgid, video['name']))
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
-            while (not self.stopped() and 
+            while (not self.stopped() and
                    (time.time() <= start_time + video['length'] - INTER_VIDEO_DELAY)):
                 pass
-            if (video['type'] != 'loop'):
-                self.__debug_("setting %.2fs kill timer for %i (%s)" % 
+            # If type=loop and length=0, loop forever
+            if (video['type'] != 'loop' and length == 0.0):
+                self.__debug_("Looping indefinitely for %i (%s)" %
+                              (pgid, name))
+            # otherwise, kill it
+            else:
+                self.__debug_("setting %.2fs kill timer for %i (%s)" %
                               (INTER_VIDEO_DELAY, pgid, video['name']))
                 threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid, video['name']]).start()
-        # except:
-        #     self.__debug_("Unable to start video", video['name'], l=0)
+        except:
+            self.__debug_("Unable to start video", name, l=0)
 
     def __stop_video__(self, pgid, name):
         try:
@@ -141,34 +168,32 @@ class VideoThread(threading.Thread):
             self.__debug_("Couldn't terminate %i (%s)" % (pgid, name))
             pass
 
+    def __get_length__(self, filename):
+        return ffprobe.duration(filename)
+
 
 def main():
     films = [
         {'name': "idle_2",
-            'file': "media/idle_2.mp4",
+            'file': "idle_2.mp4",
             'type': 'loop',
-            'start': 0.0,
-            'length': 0.0,
             'layer': 1,
          },
         {'name': "tv-color-bars-distorted",
-            'file': "media/tv-color-bars-distorted.mp4",
+            'file': "tv-color-bars-distorted.mp4",
             'type': 'transition',
-            'start': 0.0,
             'length': 1.0,
             'layer': 9,
          },
         {'name': "tv-static-transition",
-            'file': "media/tv-static-transition.mp4",
+            'file': "tv-static-transition.mp4",
             'type': 'transition',
-            'start': 0.0,
             'length': 1.0,
             'layer': 9,
          },
         {'name': "1960s-baltimore-family",
-            'file': "media/1960s-baltimore-family.mp4",
+            'file': "1960s-baltimore-family.mp4",
             'type': 'content',
-            'start': 0.0,
             'length': 10.0,
             'layer': 5,
          },

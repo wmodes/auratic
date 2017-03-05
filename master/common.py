@@ -60,15 +60,6 @@ def debug(*args, **kargs):
         debug_last_caller = caller
 
 
-# def debug(text, level=1):
-#     if (DEBUG >= level):
-#         # if now is greater than our last debug time + an interval
-#         if (text not in last_debug_time or
-#                 time() > last_debug_time[text] + debug_interval):
-#             report("debug: " + text)
-#             last_debug_time[text] = time()
-
-
 def update(*args):
     """periodically report information at report_interval seconds.
     Note: Accepts multiple arguments"""

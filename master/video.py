@@ -10,21 +10,30 @@ from random import choice
 import threading
 import os
 from subprocess import call
+import json
 
 # local modules
 import videothread
-from video_db import *
 from common import *
 
+#
+# Constants
+#
+MEDIA_BASE = 'media'
+FILMDB_FILE = 'films.json'
 
 #
 # Globals
 #
 
-transition_film_list = []
-content_film_list = []
-loop_film_list = []
-# create a dictionary of lists
+# A list of film records 
+# (each record of which is a film dict)
+film_db = []
+# A dictionary of lists of films, indexed by type 
+# (each record of which is a film dict)
+film_lists = {}
+# A dictionary of content types, indexed by trigger
+# (each record of which is a film dict)
 content_film_dict = {}
 
 #
@@ -33,20 +42,28 @@ content_film_dict = {}
 
 def create_film_lists():
     """Iterate through imported database and sort list by type"""
-    for film in films:
+    for film in film_db:
         if 'disabled' not in film or not film['disabled']:
-            if film['type'] == 'transition':
-                transition_film_list.append(film)
-            elif film['type'] == 'content':
-                content_film_list.append(film)
-            elif film['type'] == 'loop':
-                loop_film_list.append(film)
+            # make lists of film types
+            # Note, that this means a film can be in several lists
+            if 'type' in film:
+                for tag in film['type']:
+                    if tag not in film_lists: 
+                        film_lists[tag] = [film]
+                    else:
+                        film_lists[tag].append(film)
+
+
+def read_film_file(filename):
+    """Get JSON film file. File """
+    with open(filename, 'r') as fp:
+        return json.load(fp)
 
 
 def create_content_dict():
     """Iterate through content db and create dict keyed by trigger"""
     # look through all films in the content list
-    for film in content_film_list:
+    for film in film_list['content']:
         # if a film has a trigger key
         if 'trigger' in film:
             # get the film's trigger value
@@ -65,6 +82,8 @@ def create_content_dict():
 
 
 def main():
+    global film_db
+    film_db = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
     create_film_lists()
     create_content_dict()
     try:
