@@ -127,9 +127,9 @@ class VideoThread(threading.Thread):
         if (video['type'] == 'loop'):
             my_cmd = " ".join(LOOP_CMD + [filename])
         elif (video['type'] == 'transition'):
-            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), filename])
+            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(start), filename])
         else: 
-            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), filename])
+            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(start), filename])
         self._debug("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
         # TODO: after debugging, replace 'if True' with 'try' and enable 'except'
@@ -147,7 +147,7 @@ class VideoThread(threading.Thread):
             # wait in a tight loop, checking if we've received stop event or time is over
             start_time = time.time()
             while (not self.stopped() and
-                   (time.time() <= start_time + video['length'] - INTER_VIDEO_DELAY)):
+                   (time.time() <= start_time + length - INTER_VIDEO_DELAY)):
                 pass
             # If type=loop and length=0, loop forever
             if (video['type'] != 'loop' and length == 0.0):
