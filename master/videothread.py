@@ -64,7 +64,7 @@ class VideoThread(threading.Thread):
         return self._stop.isSet()
 
     def debug(self, debug_flag):
-        self._debug = debug_flag
+        self._debug_flag = debug_flag
 
     def _debug(self, *args, **kwargs):
         """Produce debug message, indenting if from same calling function"""
@@ -73,7 +73,7 @@ class VideoThread(threading.Thread):
             level = kwargs["level"]
         elif("l" in kwargs):
             level = kwargs["l"]
-        if (self._debug >= level):
+        if (self._debug_flag >= level):
             text = " ".join(list(map(str, args)))
             # get name of calling function
             caller = sys._getframe(1).f_code.co_name
@@ -173,7 +173,7 @@ class VideoThread(threading.Thread):
             pass
 
     def _get_length(self, filename):
-        debug("Getting duration of %s" % filename)
+        self._debug("Getting duration of %s" % filename)
         return ffprobe.duration(filename)
 
 
