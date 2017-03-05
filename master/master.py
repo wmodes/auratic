@@ -15,6 +15,7 @@ from video import *
 # Globals
 #
 old_video_threads = []
+film_db = []
 
 def trigger_actions(data):
     """Trigger all of the actions specified by the database"""
