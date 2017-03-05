@@ -30,7 +30,7 @@ film_dict = {}
 # (each record of which is a film dict)
 content_dict = {}
 
-def trigger_actions(object_data, content_dict):
+def trigger_actions(object_data, transition_list, content_dict):
     """Trigger all of the actions specified by the database"""
     global old_content_thread
     # get trigger
@@ -52,8 +52,8 @@ def trigger_actions(object_data, content_dict):
     # except:
     #     pass
     # start films
-    trans1_film = choice(transition_film_list)
-    trans2_film = choice(transition_film_list)
+    trans1_film = choice(transition_list)
+    trans2_film = choice(transition_list)
     content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film],
                                              media_dir=MEDIA_BASE, debug=1)
     content_thread.start()
@@ -84,7 +84,7 @@ def main():
         if all_critical_devices_live():
             object_data = listen_and_report()
             if object_data:
-                trigger_actions(object_data, content_dict)
+                trigger_actions(object_data, film_dict['transition'], content_dict)
 
 
 if __name__ == '__main__':
