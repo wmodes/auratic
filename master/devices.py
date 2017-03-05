@@ -9,8 +9,6 @@ Copyright: 2017, MIT"""
 import serial
 import os
 import subprocess
-import selenium.webdriver as webdriver
-from selenium.webdriver.common.keys import Keys
 from rfid_object_db import *
 from time import sleep, time
 import threading
