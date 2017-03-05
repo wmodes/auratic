@@ -63,7 +63,7 @@ def read_film_file(filename):
 def create_content_dict():
     """Iterate through content db and create dict keyed by trigger"""
     # look through all films in the content list
-    for film in film_list['content']:
+    for film in film_lists['content']:
         # if a film has a trigger key
         if 'trigger' in film:
             # get the film's trigger value

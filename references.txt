@@ -1,4 +1,6 @@
 Basic Pi <-> Arduino Communication over USB
 http://www.seeed.cc/project_detail.html?id=168
 
+This software uses ffprobe to get media file durations. ffprobe and ffmpeg are missing from the Debian repos. Use this guide to install ffmpeg on Debian Jessie for the pi.
 
+https://github.com/ccrisan/motioneye/wiki/Install-On-Raspbian
