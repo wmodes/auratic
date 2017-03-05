@@ -158,7 +158,7 @@ class VideoThread(threading.Thread):
                 self._debug("setting %.2fs kill timer for %i (%s)" %
                               (INTER_VIDEO_DELAY, pgid, name))
                 threading.Timer(INTER_VIDEO_DELAY, 
-                                self._stop_video_, [pgid, name]).start()
+                                self._stop_video, [pgid, name]).start()
         # except:
         #     self._debug("Unable to start video", name, l=0)
 
