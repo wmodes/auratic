@@ -48,7 +48,7 @@ class VideoThread(threading.Thread):
         self._stop = threading.Event()
         self.media_dir = media_dir
         self.playlist = playlist
-        self._debug = debug
+        self._debug_flag = debug
         self._last_debug_caller = None
         self._current_video = None
         self._player_pgid = None
