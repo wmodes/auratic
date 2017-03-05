@@ -12,6 +12,8 @@ import sys
 import signal
 import os
 import time
+
+# local imports
 import ffprobe
 
 INTER_VIDEO_DELAY = 0.75
