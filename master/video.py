@@ -104,7 +104,8 @@ def main():
                 continue
             trans1_film = choice(transition_film_list)
             trans2_film = choice(transition_film_list)
-            content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film], debug=1)
+            content_thread = videothread.VideoThread(MEDIA_BASE,
+                    [trans1_film, content_film, trans2_film], debug=1)
 
     except KeyboardInterrupt:
         print ""

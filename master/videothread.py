@@ -41,9 +41,10 @@ class VideoThread(threading.Thread):
              },]
         """
 
-    def __init__(self, playlist=None, debug=0):
+    def __init__(self, media_dir, playlist=None, debug=0):
         super(VideoThread, self).__init__()
         self._stop = threading.Event()
+        self.media_dir = media_dir
         self.playlist = playlist
         self._debug = debug
         self._last_debug_caller = None
@@ -88,9 +89,9 @@ class VideoThread(threading.Thread):
             if not self.stopped():
                 self.__start_video__(video)
 
-    # TODO: Somehow add MEDIA_BASE to the launch thing
     def __start_video__(self, video):
         """Starts a video. Takes a video object """
+        filename = self.media_dir + '/' + video['file']
         if not isinstance(video, dict):
             raise ValueError(self._example)
         if 'name' in video:
@@ -105,7 +106,7 @@ class VideoThread(threading.Thread):
         if ('length' in video and (video['length'] != 0.0 or video['type'] == 'loop')):
             length = video['length']
         else:
-            length = self.__get_length__(video['file'])
+            length = self.__get_length__(filename)
         # get start
         if 'start' in video:
             start = video['start']
@@ -117,21 +118,21 @@ class VideoThread(threading.Thread):
         # store this for later
         self._current_video = video
         # debugging output
-        self.__debug_("name: %s (%s)" % (name, video['file']))
+        self.__debug_("name: %s (%s)" % (name, filename))
         self.__debug_("type: %s, start: %.1fs, end: %.1fs, len: %.1fs" %
                       (video['type'], start, start+length, length))
         # construct the player command
         if (video['type'] == 'loop'):
-            my_cmd = " ".join(LOOP_CMD + [video['file']])
+            my_cmd = " ".join(LOOP_CMD + [filename])
         elif (video['type'] == 'transition'):
-            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), video['file']])
-        else:
-            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), video['file']])
+            my_cmd = " ".join(TRANSITION_CMD + ['--pos', str(video['start']), filename])
+        else: 
+            my_cmd = " ".join(CONTENT_CMD + ['--pos', str(video['start']), filename])
         self.__debug_("cmd:", my_cmd, l=2)
         # launch the player, saving the process handle
         # TODO: after debugging, replace 'if True' with 'try' and enable 'except'
-        #if True:
-        try:
+        if True:
+        # try:
             proc = None
             if (self._debug >= 3):
                 proc = subprocess.Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
@@ -154,9 +155,10 @@ class VideoThread(threading.Thread):
             else:
                 self.__debug_("setting %.2fs kill timer for %i (%s)" %
                               (INTER_VIDEO_DELAY, pgid, video['name']))
-                threading.Timer(INTER_VIDEO_DELAY, self.__stop_video__, [pgid, video['name']]).start()
-        except:
-            self.__debug_("Unable to start video", name, l=0)
+                threading.Timer(INTER_VIDEO_DELAY, 
+                                self.__stop_video__, [pgid, video['name']]).start()
+        # except:
+        #     self.__debug_("Unable to start video", name, l=0)
 
     def __stop_video__(self, pgid, name):
         try:
