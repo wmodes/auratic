@@ -5,3 +5,4 @@ nohup.out
 *.swp
 *.mp4
 *.log
+*.moved
