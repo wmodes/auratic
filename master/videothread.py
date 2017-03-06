@@ -106,7 +106,7 @@ class VideoThread(threading.Thread):
         self._debug("Starting %s in %s" % (name, self.media_dir))
         self._debug("Video data:", video)
         # get length
-        filelength = = self._get_length(filename)
+        filelength = self._get_length(filename)
         if ('length' not in video or video['length'] == 0.0):
             length = filelength
         else:
