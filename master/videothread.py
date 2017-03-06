@@ -105,17 +105,17 @@ class VideoThread(threading.Thread):
             return
         self._debug("Starting %s in %s" % (name, self.media_dir))
         # get length
-        if ('length' in video and (video['length'] != 0.0 or video['type'] == 'loop')):
-            length = video['length']
-        else:
+        if ('length' not in video or video['length'] == 0.0):
             length = self._get_length(filename)
+        else:
+            length = video['length']
         # get start
         if 'start' in video:
             start = video['start']
         else:
             start = 0.0
-        # if start is too large, set it to 0 (unless type=loop)
-        if (video['type'] != 'loop' and start >= length):
+        # if start is too large, set it to 0
+        if (start >= length):
             start = 0.0
         # store this for later
         self._current_video = video
