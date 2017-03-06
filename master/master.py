@@ -30,11 +30,25 @@ film_dict = {}
 # (each record of which is a film dict)
 content_dict = {}
 
-def trigger_actions(object_data, transition_list, content_dict):
+
+def create_object_dict(object_list):
+    """Iterate through content db and create dict keyed by trigger"""
+    # look through all films in the content list
+    object_dict = {'default': 'default'}
+    for obj in object_list:
+        # if a film has a trigger key
+        if 'trigger' in obj and 'rfid' in obj:
+            # get the object's trigger and rfid values
+            trigger_value = obj['trigger']
+            rfid_value = obj['rfid']
+            # create an entry of triggers indexed by rfid
+            object_dict[rfid_value] = trigger
+    return object_dict
+
+
+def trigger_actions(trigger, transition_list, content_dict):
     """Trigger all of the actions specified by the database"""
     global old_content_thread
-    # get trigger
-    trigger = object_data["key"]
     if trigger in content_dict:
         content_film = choice(content_dict[trigger])
     else:
@@ -61,13 +75,16 @@ def trigger_actions(object_data, transition_list, content_dict):
 
 
 def main():
+    # setup everything
     report("Reading film database")
     film_list = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
-    debug("film_list", film_list)
+    debug("\nfilm_list", film_list)
     film_dict = create_film_lists_dict(film_list)
     debug(film_dict)
     content_dict = create_content_dict(film_dict['content'])
-    debug("content_dict:", content_dict)
+    debug("\ncontent_dict:", content_dict)
+    object_dict = make_object_dict(film_dict["content"])
+    debug("\nobject_dict:", object_dict, "\n")
 
     report("starting idle video")
     loop_film = choice(film_dict['loop'])
@@ -83,9 +100,16 @@ def main():
             setup_devices()
         # let's take actions if we can
         if all_critical_devices_live():
-            object_data = listen_and_report()
-            if object_data:
-                trigger_actions(object_data, film_dict['transition'], content_dict)
+            rfid = listen_and_report()
+            trigger = get_object_trigger(rfid, object_db)
+            if trigger:
+                trigger_actions(trigger, film_dict['transition'], content_dict)
+
+
+def get_object_trigger(rfid, object_dict):
+    if rfid not in object_dict:
+        rfid = "default"
+    return object_dict[rfid]
 
 
 if __name__ == '__main__':
