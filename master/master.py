@@ -83,7 +83,7 @@ def main():
     debug(film_dict)
     content_dict = create_content_dict(film_dict['content'])
     debug("\ncontent_dict:", content_dict)
-    object_dict = make_object_dict(film_dict["content"])
+    object_dict = create_object_dict(film_dict["content"])
     debug("\nobject_dict:", object_dict, "\n")
 
     report("starting idle video")
