@@ -29,6 +29,8 @@ film_dict = {}
 # A dictionary of content types, indexed by trigger
 # (each record of which is a film dict)
 content_dict = {}
+# A dictionary of RFID -> trigger associations
+onject_dict = {}
 
 
 def create_object_dict(object_list):
@@ -42,7 +44,7 @@ def create_object_dict(object_list):
             trigger_value = obj['trigger']
             rfid_value = obj['rfid']
             # create an entry of triggers indexed by rfid
-            object_dict[rfid_value] = trigger
+            object_dict[rfid_value] = trigger_value
     return object_dict
 
 
