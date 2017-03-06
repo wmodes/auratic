@@ -113,8 +113,10 @@ class VideoThread(threading.Thread):
         # get start
         if 'start' in video:
             start = video['start']
+            debug("Start:", start)
         else:
             start = 0.0
+        debug("Start:", start)
         # if start is too large, set it to 0
         if (start >= length):
             start = 0.0
