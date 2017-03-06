@@ -9,7 +9,6 @@ Copyright: 2017, MIT"""
 import serial
 import os
 import subprocess
-from rfid_object_db import *
 from time import sleep, time
 import threading
 from evdev import InputDevice
@@ -260,11 +259,6 @@ def tell_device(device, text):
         sleep(RETRY_DELAY)
 
 
-def get_rfid_data(rfid):
-    if rfid not in object_db:
-        rfid = "default"
-    return object_db[rfid]
-
 #
 # Outside world actions & communication
 #
@@ -331,7 +325,6 @@ def listen_and_report():
                     rfid_in = ""
         if rfid_good:
             report("RFID found:", rfid_good)
-            result = get_rfid_data(rfid_good)
         # clear incoming buffer in case we have stuff waiting
         # rfid_device.reset_input_buffer()
         # rfid_device.flushInput()
@@ -366,7 +359,7 @@ def listen_and_report():
         #     report("Continue listening for RFID")
     except IOError:
         update("WARNING: Lost RFID device")
-    return(result)
+    return(rfid_good)
 
 
 def main():

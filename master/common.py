@@ -14,7 +14,7 @@ import sys
 #
 DEBUG = 1
 MEDIA_BASE = 'media'
-FILMDB_FILE = 'films.json'
+FILMDB_FILE = 'OBJECT_FILM_DB.json'
 
 #
 # Globals
