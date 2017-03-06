@@ -136,7 +136,7 @@ class VideoThread(threading.Thread):
         if True:
         # try:
             proc = None
-            if (self._debug >= 3):
+            if (self._debug_flag >= 3):
                 proc = subprocess.Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin)
             else:
                 proc = subprocess.Popen(my_cmd, shell=True, preexec_fn=os.setsid, stdin=nullin, stdout=nullout)
@@ -144,19 +144,19 @@ class VideoThread(threading.Thread):
             pgid = os.getpgid(proc.pid)
             self._player_pgid = pgid
             self._debug("Starting process: %i (%s)" % (pgid, name))
-            # wait in a tight loop, checking if we've received stop event or time is over
-            start_time = time.time()
-            while (not self.stopped() and
-                   (time.time() <= start_time + length - INTER_VIDEO_DELAY)):
-                pass
             # If type=loop and length=0, loop forever
             if (video['type'] == 'loop'):
                 self._debug("Looping indefinitely for %i (%s)" %
                               (pgid, name))
-            # otherwise, kill it
+            # otherwise, wait and kill it
             else:
-                self._debug("setting %.2fs kill timer for %i (%s)" %
-                              (INTER_VIDEO_DELAY, pgid, name))
+                self._debug("Waiting %.2fs and setting kill timer for %i (%s)" %
+                            (length - INTER_VIDEO_DELAY, pgid, name))
+                # wait in a tight loop, checking if we've received stop event or time is over
+                start_time = time.time()
+                while (not self.stopped() and
+                       (time.time() <= start_time + length - INTER_VIDEO_DELAY)):
+                    pass
                 threading.Timer(INTER_VIDEO_DELAY, 
                                 self._stop_video, [pgid, name]).start()
         # except:
