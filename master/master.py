@@ -67,6 +67,7 @@ def main():
     film_dict = create_film_lists_dict(film_list)
     debug(film_dict)
     content_dict = create_content_dict(film_dict['content'])
+    debug("content_dict:", content_dict)
 
     report("starting idle video")
     loop_film = choice(film_dict['loop'])
