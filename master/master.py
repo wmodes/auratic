@@ -6,6 +6,8 @@ Copyright: 2017, MIT"""
 # -*- coding: iso-8859-15 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
+from pprint import pprint
+
 # local modules
 from common import *
 from devices import *
@@ -77,6 +79,14 @@ def trigger_actions(trigger, transition_list, content_dict):
     old_video_threads.append(content_thread)
 
 
+def get_object_trigger(rfid, object_dict):
+    if rfid not in object_dict:
+        debug("RFID", rfid, "not in object database")
+        # rfid = "default"
+        return None
+    return object_dict[rfid]
+
+
 #
 # main
 #
@@ -85,13 +95,13 @@ def main():
     # setup everything
     report("Reading film database")
     film_list = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
-    debug("\nfilm_list", film_list)
+    debug("\nfilm_list = \n", pprint(film_list))
     film_dict = create_film_lists_dict(film_list)
-    debug(film_dict)
+    debug("\nfilm_dict = \n", pprint(film_dict))
     content_dict = create_content_dict(film_dict['content'])
-    debug("\ncontent_dict:", content_dict)
+    debug("\ncontent_dict = \n", pprint(content_dict))
     object_dict = create_object_dict(film_dict["content"])
-    debug("\nobject_dict:", object_dict, "\n")
+    debug("\nobject_dict = \n", pprint(object_dict))
 
     report("starting idle video")
     loop_film = choice(film_dict['loop'])
@@ -111,14 +121,6 @@ def main():
             trigger = get_object_trigger(rfid, object_dict)
             if trigger:
                 trigger_actions(trigger, film_dict['transition'], content_dict)
-
-
-def get_object_trigger(rfid, object_dict):
-    if rfid not in object_dict:
-        debug("RFID", rfid, "not in object database")
-        # rfid = "default"
-        return None
-    return object_dict[rfid]
 
 
 if __name__ == '__main__':
