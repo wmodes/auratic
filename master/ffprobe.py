@@ -10,7 +10,7 @@
 
 import subprocess as sp
 import json
-import common
+from common import *
 
 
 def probe(vid_file_path):
