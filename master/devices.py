@@ -257,7 +257,7 @@ def tell_device(device, text):
         except:
             pass
         # report("Serial Try", i, "=", response, "waiting:", waiting)
-        if RSP_ACK in response:
+        if response in locals() and RSP_ACK in response:
             return response
         sleep(RETRY_DELAY)
 
