@@ -59,7 +59,9 @@ def trigger_actions(trigger, transition_list, content_dict):
     # TODO: Get actual length of video (steal from video.py)
     duration = content_film['length']
     # start chart recorder
+    debug("Starting chart recorder")
     start_chart(duration)
+    debug("Chart recorder started")
     # kill old film if necessary
     # try:
     while old_video_threads:
