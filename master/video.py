@@ -95,7 +95,7 @@ def create_film_lists_dict(film_list):
             debug("File %s not found. Removed from database" % filename)
         else:
             # first let's fill in necessary but missing fields
-            if (duration not in film or film['length'] == 0):
+            if ('length' not in film or film['length'] == 0):
                 film['length'] = get_duration(content_film['file'])
                 debug("Getting duration for %s: %f" % (name, film['length']))
             # make lists of film types
