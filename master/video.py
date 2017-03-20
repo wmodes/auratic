@@ -84,7 +84,20 @@ def create_film_lists_dict(film_list):
     """Iterate through imported database and sort list by type"""
     film_dict = {}
     for film in film_list:
-        if 'disabled' not in film or not film['disabled']:
+        filename = MEDIA_BASE + '/' + film['file']
+        if 'name' in film:
+            name = film['name']
+        else:
+            name = film['file']
+        if 'disabled' in film and film['disabled']:
+            debug("%s disabled. Removed from database" % name)
+        elif not os.path.isfile(filename):
+            debug("File %s not found. Removed from database" % filename)
+        else:
+            # first let's fill in necessary but missing fields
+            if (duration not in film or film['length'] == 0):
+                film['length'] = get_duration(content_film['file'])
+                debug("Getting duration for %s: %f" % (name, film['length']))
             # make lists of film types
             # Note, that this means a film can be in several lists
             if 'type' in film:
@@ -113,6 +126,19 @@ def create_content_dict(content_list):
                 # otherwise, append film to the existing list
                 content_dict[trigger_value].append(film)
     return content_dict
+
+
+#
+# file stuff
+#
+
+def get_duration(filename):
+    debug("Getting duration of %s" % filename)
+    length = ffprobe.duration(filename)
+    if length == None:
+        length = 0
+    return length
+
 
 #
 # Control

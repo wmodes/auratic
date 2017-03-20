@@ -14,7 +14,9 @@ import threading
 from evdev import InputDevice
 from select import select
 
+# local imports
 from common import *
+import ffprobe
 
 # Constants
 #

@@ -56,7 +56,6 @@ def trigger_actions(trigger, transition_list, content_dict):
     else:
         content_film = choice(content_dict['default'])
     debug('Content:', content_film)
-    # TODO: Get actual length of video (steal from video.py)
     duration = content_film['length']
     # start chart recorder
     debug("Starting chart recorder")
@@ -77,6 +76,10 @@ def trigger_actions(trigger, transition_list, content_dict):
     content_thread.start()
     old_video_threads.append(content_thread)
 
+
+#
+# main
+#
 
 def main():
     # setup everything
