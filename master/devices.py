@@ -251,8 +251,11 @@ def tell_device(device, text):
     for i in range(MAX_RETRIES):
         ser.write(text)
         sleep(RETRY_DELAY)
-        waiting = ser.inWaiting()
-        response = ser.readline().strip()
+        try:
+            waiting = ser.inWaiting()
+            response = ser.readline().strip()
+        except:
+            pass
         # report("Serial Try", i, "=", response, "waiting:", waiting)
         if RSP_ACK in response:
             return response
