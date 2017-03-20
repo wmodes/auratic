@@ -179,7 +179,11 @@ class VideoThread(threading.Thread):
 
     def _get_length(self, filename):
         self._debug("Getting duration of %s" % filename)
-        return ffprobe.duration(filename)
+        length = ffprobe.duration(filename)
+        if length == None:
+            length = 0
+        return length
+
 
 
 def main():
