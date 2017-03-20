@@ -97,7 +97,7 @@ def create_film_lists_dict(film_list):
         else:
             # first let's fill in necessary but missing fields
             if ('length' not in film or film['length'] == 0):
-                film['length'] = get_duration(film['file'])
+                film['length'] = get_duration(filename)
                 debug("Getting duration for %s: %f" % (name, film['length']))
             # make lists of film types
             # Note, that this means a film can be in several lists
