@@ -12,7 +12,7 @@ import sys
 #
 # Constants
 #
-DEBUG = 1
+DEBUG = 2
 MEDIA_BASE = 'media'
 FILMDB_FILE = 'OBJECT_FILM_DB.json'
 

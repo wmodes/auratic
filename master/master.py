@@ -6,7 +6,7 @@ Copyright: 2017, MIT"""
 # -*- coding: iso-8859-15 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
-from pprint import pprint
+from pprint import pformat
 
 # local modules
 from common import *
@@ -95,13 +95,13 @@ def main():
     # setup everything
     report("Reading film database")
     film_list = read_film_file(MEDIA_BASE + '/' + FILMDB_FILE)
-    debug("\nfilm_list = \n", pprint(film_list))
+    debug("\nfilm_list = \n", pformat(film_list), level=2)
     film_dict = create_film_lists_dict(film_list)
-    debug("\nfilm_dict = \n", pprint(film_dict))
+    debug("\nfilm_dict = \n", pformat(film_dict), level=2)
     content_dict = create_content_dict(film_dict['content'])
-    debug("\ncontent_dict = \n", pprint(content_dict))
+    debug("\ncontent_dict = \n", pformat(content_dict), level=2)
     object_dict = create_object_dict(film_dict["content"])
-    debug("\nobject_dict = \n", pprint(object_dict))
+    debug("\nobject_dict = \n", pformat(object_dict), level=2)
 
     report("starting idle video")
     loop_film = choice(film_dict['loop'])
