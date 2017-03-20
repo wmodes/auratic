@@ -110,7 +110,9 @@ def main():
 
 def get_object_trigger(rfid, object_dict):
     if rfid not in object_dict:
-        rfid = "default"
+        debug("RFID", rfid, "not in object database")
+        # rfid = "default"
+        return None
     return object_dict[rfid]
 
 
