@@ -1,4 +1,4 @@
-/* chart_recorder.cpp - Simulated Chart Recorder (Truth Machine Project)
+/* chart_recorder.cpp - Simulated Chart Recorder (Auratic Interpretter)
  by Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
  29 January 2017 
 */
@@ -10,7 +10,7 @@ using namespace std;
 // CONSTANTS
 
 const bool IDLESWEEP = true;
-const int IDLEPERIOD = 200;  // number of moves between start and end of full cycle
+const int IDLEPERIOD = 600;  // number of moves between start and end of full cycle
 
 const int PENMIN = 50;       // minimum allowable rotation of servo
 const int PENMAX = 170;     // maximum allowable rotation of servo
