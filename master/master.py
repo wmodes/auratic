@@ -117,10 +117,14 @@ def main():
             setup_devices()
         # let's take actions if we can
         if all_critical_devices_live():
-            rfid = listen_and_report()
-            trigger = get_object_trigger(rfid, object_dict)
+            if debug and devices['rfid']['status'] != 'live':
+                trigger = raw_input("Enter trigger: ")
+            else:
+                rfid = listen_and_report()
+                trigger = get_object_trigger(rfid, object_dict)
             if trigger:
                 trigger_actions(trigger, film_dict['transition'], content_dict)
+                trigger = ''
 
 
 if __name__ == '__main__':
