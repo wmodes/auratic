@@ -1,4 +1,4 @@
-/* chart_recorder.cpp - Simulated Chart Recorder (Truth Machine Project)
+/* chart_recorder.cpp - Simulated Chart Recorder (Auratic Interpretter)
  by Wes Modes (wmodes@gmail.com) & SL Benz (slbenzy@gmail.com)
  29 January 2017 
 */
@@ -9,16 +9,17 @@ using namespace std;
 
 // CONSTANTS
 
-const bool IDLESWEEP = false;
+const bool IDLESWEEP = true;
+const int IDLEPERIOD = 600;  // number of moves between start and end of full cycle
 
-const int PENMIN = 70;       // minimum alloable rotation of servo
-const int PENMAX = 120;     // maximam allowable rotation of servo
+const int PENMIN = 50;       // minimum allowable rotation of servo
+const int PENMAX = 170;     // maximum allowable rotation of servo
 const int PENAMP = (PENMAX - PENMIN) / 2; // max allowable amplitude
 const int PENREST = PENMIN + PENAMP;  // where pen rests, center of min & max
-const int PENPERIOD = 100;  // number of moves between start and end of full cycle
 const int PENFREQ = 1;      // number of full waves to make in each cycle
+const int ACTIVEPERIOD = 25;  // number of moves between start and end of full cycle
 
-const int GLOBAL_WAIT = 10;
+const int GLOBAL_WAIT = 30;
 
 const int AVAILPENS[] = {9, 10, 11, 3, 5, 6};   // avail arduino pins (order of pref)
 const int MAXPENS = sizeof(AVAILPENS);
@@ -48,15 +49,43 @@ int penAmp[PENSINUSE];      // amplitude of current movement 0 to 100%
 bool penMoving[PENSINUSE];  // check whether still traveling
 Servo servo[PENSINUSE];     // declare an array of server objects
 int datasetPos[PENSINUSE];  // records where we are in the dataset
+int globalPeriod = IDLEPERIOD;  // number of moves between start and end of full cycle
 
 // an idle dataset
-int dataset0[] = {100};
+int dataset0[] = {50};
 
 // a sorta EKG dataset
-int dataset1[] = {75, 65, 75, 100, 75, 100, 75, 50, 
-  25, 25, 15, 15, 75, 10, 10, 5, 
-  25, 10, 10, 10, 25, 10, 10, 10,
-  25, 10, 10, 10, 25, 10, 10, 10
+int dataset1[] = {
+    5, 10, 5, 30, 5, 10, 5,
+    5, 10, 10, 75, 10, 10, 5,
+    25, 15, 5, 15, 25,
+    5, 10, 5, 10, 5, 10, 5,
+    5, 10, 10, 75, 10, 10, 5,
+    25, 15, 5, 15, 25,
+    5, 10, 5, 30, 5, 10, 5,
+    25, 15, 5, 15, 25,
+    25, 50, 75, 100, 75, 100, 75, 50, 25,
+    10, 45, 100, 45, 10,
+    5, 10, 10, 75, 10, 10, 5,
+    25, 15, 5, 15, 25,
+    5, 5, 5, 10, 5, 5, 5,
+    5, 10, 10, 75, 10, 10, 5,
+    5, 10, 5, 30, 5, 10, 5,
+    25, 15, 5, 15, 25,
+    25, 75, 25,
+    25, 15, 5, 15, 25,
+    5, 10, 5, 30, 5, 10, 5,
+    25, 50, 75, 100, 75, 100, 75, 50, 25,
+    25, 15, 5, 15, 25,
+    10, 45, 100, 45, 10,
+    5, 10, 5, 10, 5, 10, 5,
+    5, 10, 10, 75, 10, 10, 5,
+    5, 5, 5, 10, 5, 5, 5,
+    25, 10, 10, 10, 25, 10, 10, 10,
+    25, 15, 5, 15, 25,
+    25, 10, 10, 10, 25, 10, 10, 10,
+    25, 75, 25,
+    5, 10, 10, 75, 10, 10, 5
 };
 
 // a sorta heartbeat dataset
@@ -95,7 +124,7 @@ void penStart(int penNo, int amp)
 {
   penPos[penNo] = PENREST;
   penX[penNo] = 0;
-  penPer[penNo] = PENPERIOD * amp / 100;
+  penPer[penNo] = globalPeriod * amp / 100;
   penAmp[penNo] = amp;
   penMoving[penNo] = true;
   penPosition(penNo, PENREST);
@@ -122,7 +151,8 @@ void penMove(int penNo)
     return;
   }
   // we calculate new pen Y-position according to sin function of X-position
-  double penY = sin(2 * (double) M_PI * PENFREQ * ((double) penX[penNo] / PENPERIOD));
+  // double penY = sin(2 * (double) M_PI * PENFREQ * ((double) penX[penNo] / globalPeriod));
+  double penY = sin(2 * (double) M_PI * PENFREQ * ((double) penX[penNo] / penPer[penNo]));
   // now we scale it
   int newPos = PENREST + (PENAMP * penY * penAmp[penNo] / 100);
   // check to make sure pen hasn't hit our limits (not likely, but a good practice)
@@ -182,6 +212,21 @@ void penStatus(int penNo)
   Serial.println("");
 }
 
+void startAll()
+{
+  activated = true;
+  globalPeriod = ACTIVEPERIOD;
+  for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
+    datasetPos[penNo] = random(datalength[penNo+1]);
+  }
+}
+
+void stopAll()
+{
+  activated = false;
+  globalPeriod = IDLEPERIOD;
+}
+
 void moveAll() 
 {
   for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
@@ -223,12 +268,12 @@ void checkForRequests()
     // did we receive a START request?
     else if (reqMaster.indexOf(reqStart) >= 0) {
       Serial.println(reqStart + ":" + rspAck);
-      activated = true;
+      startAll();
     }
     // did we receive a STOP request?
     else if (reqMaster.indexOf(reqStop) >= 0) {
       Serial.println(reqStop + ":" + rspAck);
-      activated = false;
+      stopAll();
     }
     // did we receive a NODEBUG request?
     else if (reqMaster.indexOf(reqNoDebug) >= 0) {
@@ -251,7 +296,7 @@ void doTheThings()
   if (activated || IDLESWEEP) {
     int newAmp, datasetNum;
     //Serial.println("Working...");
-    delay(100);
+    // delay(100);
     // for each attached pen, we update it once per cycle
     for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
       //penStatus(penNo);
@@ -294,12 +339,13 @@ void doTheThings()
 
 void setup() 
 {
+  randomSeed(analogRead(0));
   Serial.begin(9600);      // open the serial port at 9600 bps:
   Serial.setTimeout(100);
   //Serial.println("\n\n\n");
   for (int penNo = 0; penNo < PENSINUSE; penNo += 1) {
     penSetup(penNo);
-    datasetPos[penNo] = 0;
+    datasetPos[penNo] = PENREST;
   }
   delay(2000);
 }
