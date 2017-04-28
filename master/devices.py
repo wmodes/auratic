@@ -248,20 +248,27 @@ def all_critical_devices_live():
 
 def tell_device(device, text):
     ser = devices[device]['handle']
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
-    for i in range(MAX_RETRIES):
+    try:
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
         ser.write(text)
         sleep(RETRY_DELAY)
-        try:
-            waiting = ser.inWaiting()
-            response = ser.readline().strip()
-        except:
-            pass
-        # report("Serial Try", i, "=", response, "waiting:", waiting)
-        if response in locals() and RSP_ACK in response:
-            return response
-        sleep(RETRY_DELAY)
+        response = ser.readline().strip()
+    except:
+        response = None
+    return response
+    # for i in range(MAX_RETRIES):
+    #     ser.write(text)
+    #     sleep(RETRY_DELAY)
+    #     try:
+    #         waiting = ser.inWaiting()
+    #         response = ser.readline().strip()
+    #     except:
+    #         pass
+    #     # report("Serial Try", i, "=", response, "waiting:", waiting)
+    #     if response in locals() and RSP_ACK in response:
+    #         return response
+    #     sleep(RETRY_DELAY)
 
 
 #
