@@ -55,28 +55,26 @@ def trigger_actions(trigger, transition_list, content_dict):
     global old_content_thread
     if trigger in content_dict:
         content_film = choice(content_dict[trigger])
-    else:
-        content_film = choice(content_dict['default'])
-    debug('Content:', content_film)
-    duration = content_film['length']
-    # start chart recorder
-    debug("Starting chart recorder")
-    start_chart(duration)
-    debug("Chart recorder started")
-    # kill old film if necessary
-    # try:
-    while old_video_threads:
-        thread = old_video_threads.pop()
-        thread.stop()
-    # except:
-    #     pass
-    # start films
-    trans1_film = choice(transition_list)
-    trans2_film = choice(transition_list)
-    content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film],
-                                             media_dir=MEDIA_BASE, debug=DEBUG)
-    content_thread.start()
-    old_video_threads.append(content_thread)
+        debug('Content:', content_film)
+        duration = content_film['length']
+        # start chart recorder
+        debug("Starting chart recorder")
+        start_chart(duration)
+        debug("Chart recorder started")
+        # kill old film if necessary
+        # try:
+        while old_video_threads:
+            thread = old_video_threads.pop()
+            thread.stop()
+        # except:
+        #     pass
+        # start films
+        trans1_film = choice(transition_list)
+        trans2_film = choice(transition_list)
+        content_thread = videothread.VideoThread([trans1_film, content_film, trans2_film],
+                                                 media_dir=MEDIA_BASE, debug=DEBUG)
+        content_thread.start()
+        old_video_threads.append(content_thread)
 
 
 def get_object_trigger(rfid, object_dict):
