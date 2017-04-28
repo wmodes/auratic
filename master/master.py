@@ -114,7 +114,7 @@ def main():
         # can we do interactive input
         if debug and devices['rfid']['status'] != 'live' and sys.stdin.isatty():
             interactive = True
-        else
+        else:
             interactive = False
         # check if all of our devices are active
         if not all_devices_live():
