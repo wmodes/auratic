@@ -13,7 +13,7 @@ const bool IDLESWEEP = true;
 const int IDLEPERIOD = 600;  // number of moves between start and end of full cycle
 
 const int PENMIN = 50;       // minimum allowable rotation of servo
-const int PENMAX = 170;     // maximum allowable rotation of servo
+const int PENMAX = 170;     // mIDLEaximum allowable rotation of servo
 const int PENAMP = (PENMAX - PENMIN) / 2; // max allowable amplitude
 const int PENREST = PENMIN + PENAMP;  // where pen rests, center of min & max
 const int PENFREQ = 1;      // number of full waves to make in each cycle
@@ -124,7 +124,16 @@ void penStart(int penNo, int amp)
 {
   penPos[penNo] = PENREST;
   penX[penNo] = 0;
+
   penPer[penNo] = globalPeriod * amp / 100;
+  if (debug) {
+    Serial.print (", globalPeriod: ");
+    Serial.print (globalPeriod);
+    Serial.print (", amplitude: ");
+    Serial.print (amp);
+    Serial.print (", penPeriod: ");
+    Serial.println (penPer[penNo]);
+  }
   penAmp[penNo] = amp;
   penMoving[penNo] = true;
   penPosition(penNo, PENREST);
@@ -151,10 +160,21 @@ void penMove(int penNo)
     return;
   }
   // we calculate new pen Y-position according to sin function of X-position
-  // double penY = sin(2 * (double) M_PI * PENFREQ * ((double) penX[penNo] / globalPeriod));
-  double penY = sin(2 * (double) M_PI * PENFREQ * ((double) penX[penNo] / penPer[penNo]));
+  // float penY = sin(2 * (float)M_PI * PENFREQ * ((float)penX[penNo] / globalPeriod));
+  float r = (float)penX[penNo] / penPer[penNo];
+  float penY = sin(2 * (float)M_PI * PENFREQ * r);
+  if (debug) {
+    Serial.print (" penX: ");
+    Serial.print (penX[penNo]);
+    Serial.print (", penPeriod: ");
+    Serial.print (penPer[penNo]);
+    Serial.print (", r (penX/PenPer): ");
+    Serial.print (r);
+    Serial.print (", penY: ");
+    Serial.println(penY);
+  }
   // now we scale it
-  int newPos = PENREST + (PENAMP * penY * penAmp[penNo] / 100);
+  int newPos = (int)(PENREST + (PENAMP * penY * penAmp[penNo] / 100));
   // check to make sure pen hasn't hit our limits (not likely, but a good practice)
   if (newPos > PENMAX) {
     newPos = PENMAX;
@@ -294,7 +314,8 @@ void checkForRequests()
 void doTheThings()
 {
   if (activated || IDLESWEEP) {
-    int newAmp, datasetNum;
+    int newAmp = 0;
+    int datasetNum;
     //Serial.println("Working...");
     // delay(100);
     // for each attached pen, we update it once per cycle

@@ -152,7 +152,8 @@ def setup_devices():
         usb_ports = get_active_usb_ports()
         # First we assign all of our fixed port devices
         for device in sorted_devices():
-            if (device['port-status'] == 'fixed' and device['status'] != 'live'):
+            if (device['port-status'] == 'fixed' and device['status'] != 'live') and \
+                    is_port_active(device['port']):
                 debug("Unassigned device:", device['name'])
                 report("Setting up %s, ID: %s, Port: %s" % (device['name'],
                                                             device['id'], device['port']))
