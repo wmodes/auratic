@@ -7,6 +7,7 @@ Copyright: 2017, MIT"""
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 from pprint import pformat
+import sys
 
 # local modules
 from common import *
@@ -110,12 +111,17 @@ def main():
     setup_devices()
     # This is our main loop that listens and responds
     while 1:
+        # can we do interactive input
+        if debug and devices['rfid']['status'] != 'live' and sys.stdin.isatty():
+            interactive = True
+        else
+            interactive = False
         # check if all of our devices are active
         if not all_devices_live():
             setup_devices()
         # let's take actions if we can
-        if all_critical_devices_live() or (debug and devices['rfid']['status'] != 'live'):
-            if debug and devices['rfid']['status'] != 'live':
+        if all_critical_devices_live() or interactive:
+            if interactive:
                 trigger = raw_input("Enter trigger: ")
             else:
                 rfid = listen_and_report()
