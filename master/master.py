@@ -116,7 +116,7 @@ def main():
         if not all_devices_live():
             setup_devices()
         # let's take actions if we can
-        if all_critical_devices_live():
+        if all_critical_devices_live() or (debug and devices['rfid']['status'] != 'live'):
             if debug and devices['rfid']['status'] != 'live':
                 trigger = raw_input("Enter trigger: ")
             else:
