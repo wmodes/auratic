@@ -166,8 +166,8 @@ def setup_devices():
                 device['status'] = 'live'
         # Now we assign all of our variable port devices
         for port in usb_ports:
-            debug("Active ports:", str(usb_ports))
-            debug("Registered ports:", str(assigned_ports))
+            debug("Active ports:", str(usb_ports), level=3)
+            debug("Registered ports:", str(assigned_ports), level=3)
             # if this port isn't already assigned
             if (port not in assigned_ports):
                 debug("Unassigned port:", port)
