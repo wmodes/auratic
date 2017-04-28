@@ -18,7 +18,7 @@ import ffprobe
 
 INTER_VIDEO_DELAY = 0.75
 
-OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode fill']
+OMX_CMD = ['omxplayer', '--no-osd', '--no-keys', '--refresh', '--aspect-mode stretch']
 CONTENT_CMD = OMX_CMD + ['--layer 4', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer1']
 TRANSITION_CMD = OMX_CMD + ['--layer 5', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer2']
 LOOP_CMD = OMX_CMD + ['--layer 1', '--loop', '--dbus_name', 'org.mpris.MediaPlayer2.omxplayer3']
